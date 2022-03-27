@@ -1,6 +1,6 @@
 ﻿using Raylib_cs;
 
-namespace Simulation_CSharp.Entities
+namespace Simulation_CSharp.Src.Entities
 {
     public class SheepEntity : Entity
     {

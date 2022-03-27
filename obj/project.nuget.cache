@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "88SEcuSKfooB2v1ZMQGmRQDr1pnOKKeW7eNZ0mhryq5+EyNACU6QJntGei3WuzURDI38gVzQhrkJNnzOXnIKpw==",
+  "success": true,
+  "projectFilePath": "G:\\OtherProject\\Simulation-CSharp\\Simulation-CSharp\\Simulation-CSharp.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\w1nte\\.nuget\\packages\\raylib-cs\\4.0.0.1\\raylib-cs.4.0.0.1.nupkg.sha512",
+    "C:\\Users\\w1nte\\.nuget\\packages\\system.numerics.vectors\\4.5.0\\system.numerics.vectors.4.5.0.nupkg.sha512"
+  ],
+  "logs": []
+}

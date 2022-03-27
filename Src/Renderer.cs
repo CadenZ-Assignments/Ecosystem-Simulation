@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Numerics;
 using Raylib_cs;
-using Simulation_CSharp.Entities;
-using Simulation_CSharp.Tiles;
+using Simulation_CSharp.Src.Entities;
+using Simulation_CSharp.Src.Tiles;
 
-namespace Simulation_CSharp
+namespace Simulation_CSharp.Src
 {
     public static class Renderer
     {

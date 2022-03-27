@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Numerics;
 using Raylib_cs;
-using Simulation_CSharp.World;
+using Simulation_CSharp.Src.World;
 
-namespace Simulation_CSharp
+namespace Simulation_CSharp.Src
 {
     public static class SimulationCore
     {

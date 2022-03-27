@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using Raylib_cs;
-using Simulation_CSharp.Entities;
-using Simulation_CSharp.Tiles;
+using Simulation_CSharp.Src.Entities;
+using Simulation_CSharp.Src.Tiles;
 
-namespace Simulation_CSharp.World
+namespace Simulation_CSharp.Src.World
 {
     public class Level
     {

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Security.Cryptography;
-using Simulation_CSharp.Tiles;
+using Simulation_CSharp.Src.Tiles;
 
-namespace Simulation_CSharp.World
+namespace Simulation_CSharp.Src.World
 {
     public class Map
     {

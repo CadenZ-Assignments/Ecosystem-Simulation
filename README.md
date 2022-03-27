@@ -1,6 +1,6 @@
 ﻿# Ecosystem Simulation
   
-So this is a "small" project I am working on using C# and [Raylib](https://www.raylib.com/). It is inspired by [This Video By Sebastian Lague](https://www.youtube.com/watch?v=r_It_X7v-1E) and [Nature of Code By Daniel Shiffman](https://www.youtube.com/watch?v=6vX8wT1G798&list=PLRqwX-V7Uu6aFlwukCmDf0-1-uSR7mklK).  
+So this is a "small" project I am working on using C# and [Raylib](https://www.raylib.com/). I am also using a noise library called [FastNoiseLite](https://github.com/Auburn/FastNoiseLite). It is inspired by [This Video By Sebastian Lague](https://www.youtube.com/watch?v=r_It_X7v-1E) and [Nature of Code By Daniel Shiffman](https://www.youtube.com/watch?v=6vX8wT1G798&list=PLRqwX-V7Uu6aFlwukCmDf0-1-uSR7mklK).  
 I intend to explore and experiment around procedural world generation, and some level of machine learning (Maybe).
 
 ## Building the project yourself

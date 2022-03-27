@@ -1,8 +1,6 @@
-﻿using System;
-using System.Numerics;
-using Simulation_CSharp.Tiles;
+﻿using Simulation_CSharp.Src.Tiles;
 
-namespace Simulation_CSharp.Entities
+namespace Simulation_CSharp.Src.Entities
 {
     public abstract class Entity
     {
