@@ -16,8 +16,4 @@
       <PackageReference Include="Raylib-cs" Version="4.0.0.1" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Saves" />
-    </ItemGroup>
-
 </Project>

@@ -1,4 +1,4 @@
-﻿namespace Simulation_CSharp.Src.Tiles
+﻿namespace Simulation_CSharp.Tiles
 {
     public interface ITileType
     {

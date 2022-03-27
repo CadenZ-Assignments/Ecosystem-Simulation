@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
-namespace Simulation_CSharp.Src.World
+namespace Simulation_CSharp.World
 {
     // MIT License
     //

@@ -1,14 +1,14 @@
 ﻿using System.Numerics;
 
-namespace Simulation_CSharp.Src.Tiles
+namespace Simulation_CSharp.Tiles
 {
     public class TileCell
     {
-        public static readonly Vector2 CellSizeVec = new(10, 10);
-        public const float CellSize = 10;
+        public static readonly Vector2 CellSizeVec = new(20, 20);
+        private const float CellSize = 20;
 
-        private const float StartingX = 10;
-        private const float StartingY = 10;
+        private const float StartingX = 20;
+        private const float StartingY = 20;
 
         public Vector2 TruePosition;
         public int X;

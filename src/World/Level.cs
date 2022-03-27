@@ -1,20 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using Raylib_cs;
-using Simulation_CSharp.Src.Entities;
-using Simulation_CSharp.Src.Tiles;
+using Simulation_CSharp.Entities;
+using Simulation_CSharp.Tiles;
 
-namespace Simulation_CSharp.Src.World
+namespace Simulation_CSharp.World
 {
     public class Level
     {
+        public const int WorldWidth = 256;
+        public const int WorldHeight = 256;
+        
         public readonly List<Entity> Entities;
+        public readonly Queue<Entity> RemovalQueue;
         public readonly Map Map;
         
         public Level()
         {
             Entities = new List<Entity>();
-            Map = new Map();
+            RemovalQueue = new Queue<Entity>();
+            Map = new Map(WorldWidth, WorldHeight);
         }
 
         public void CreateEntity(Func<Entity> entity, TileCell position)

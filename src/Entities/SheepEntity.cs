@@ -1,6 +1,6 @@
 ﻿using Raylib_cs;
 
-namespace Simulation_CSharp.Src.Entities
+namespace Simulation_CSharp.Entities
 {
     public class SheepEntity : Entity
     {
@@ -10,12 +10,12 @@ namespace Simulation_CSharp.Src.Entities
 
         public override void Render()
         {
-            Raylib.DrawCircle((int) Position.TruePosition.X, (int) Position.TruePosition.Y, 7, Color.WHITE);
+            Raylib.DrawCircle((int) Position.TruePosition.X, (int) Position.TruePosition.Y, 12, Color.WHITE);
         }
 
         public override void Update()
         {
-            
+            base.Update();
         }
     }
 }

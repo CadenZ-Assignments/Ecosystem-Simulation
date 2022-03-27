@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Numerics;
 using Raylib_cs;
-using Simulation_CSharp.Src.Entities;
-using Simulation_CSharp.Src.Tiles;
+using Simulation_CSharp.Entities;
+using Simulation_CSharp.Tiles;
 
-namespace Simulation_CSharp.Src
+namespace Simulation_CSharp
 {
-    public static class Renderer
+    public static class Updater
     {
-        public static void Render(ref Camera2D camera)
+        public static void Update(ref Camera2D camera)
         {
             Input(ref camera);
             Raylib.BeginMode2D(camera);
@@ -22,7 +22,17 @@ namespace Simulation_CSharp.Src
 
         private static void RenderEntities()
         {
-            SimulationCore.Level.Entities.ForEach(entity => entity.Render());
+            SimulationCore.Level.Entities.ForEach(entity =>
+            {
+                entity.Render();
+                entity.Update();
+            });
+            var removalQueue = SimulationCore.Level.RemovalQueue;
+            for (var i = 0; i < removalQueue.Count; i++)
+            {
+                SimulationCore.Level.Entities.Remove(removalQueue.Dequeue());
+                Raylib.TraceLog(TraceLogLevel.LOG_INFO, "Removed Entity");
+            }
         }
         
         private static void RenderMap()

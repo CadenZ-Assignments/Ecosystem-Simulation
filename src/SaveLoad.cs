@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Text.Json;
 
-namespace Simulation_CSharp.Src
+namespace Simulation_CSharp
 {
     // TODO
     public class SaveLoad

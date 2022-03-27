@@ -1,6 +1,7 @@
-﻿using Simulation_CSharp.Src.Tiles;
+﻿using Simulation_CSharp.Tiles;
+using Simulation_CSharp.World;
 
-namespace Simulation_CSharp.Src.Entities
+namespace Simulation_CSharp.Entities
 {
     public abstract class Entity
     {
@@ -12,12 +13,27 @@ namespace Simulation_CSharp.Src.Entities
             EntityInfo = entityInfo;
         }
 
+        public void Destroy()
+        {
+            SimulationCore.Level.RemovalQueue.Enqueue(this);
+        }
+        
+        public abstract void Render();
+
+        public virtual void Update()
+        {
+            if (Position.X is > Level.WorldWidth or < 0 || Position.Y is > Level.WorldHeight or < 0)
+            {
+                Destroy();   
+            }
+        }
+        
         /// <summary>
         /// Find the closest tile of type in Entity's Sensor Range
         /// </summary>
         /// <param name="tileType">The tile type looking for.</param>
         /// <returns>The position of the closest tile, returns null if not found.</returns>
-        protected TileCell? Find(ITileType tileType)
+        protected TileCell? FindTile(ITileType tileType)
         {
             for (var x = 0; x < EntityInfo.MaxSensorRange; x++)
             {
@@ -33,13 +49,6 @@ namespace Simulation_CSharp.Src.Entities
 
             return null;
         }
-        
-        public abstract void Render();
-
-        public virtual void Update()
-        {
-            
-        }
     }
     
     public class EntityInfo
@@ -49,12 +58,57 @@ namespace Simulation_CSharp.Src.Entities
         public readonly ushort MaxHunger;
         public readonly ushort MaxReproductiveUrge;
         public readonly ushort MaxSensorRange;
-        
-        public ushort Health { get; set; }
-        public ushort Thirst { get; set; }
-        public ushort Hunger { get; set; }
-        public ushort ReproductiveUrge { get; set; }
 
+        private ushort _health;
+        public ushort Health
+        {
+            get => _health;
+            set
+            {
+                _health = value;
+                OnHealthChanged?.Invoke(_health);
+            }
+        }
+
+        private ushort _thirst;
+        public ushort Thirst {
+            get => _thirst;
+            set
+            {
+                _thirst = value;
+                OnThirstChanged?.Invoke(_thirst);        
+            }
+        }
+
+        private ushort _hunger;
+        public ushort Hunger
+        {
+            get => _hunger;
+            set
+            {
+                _hunger = value;
+                OnHungerChanged?.Invoke(_hunger);
+            }
+        }
+
+        private ushort _reproductiveUrge;
+        public ushort ReproductiveUrge
+        {
+            get => _reproductiveUrge;
+            set
+            {
+                _reproductiveUrge = value;
+                OnReproductiveUrgeChanged?.Invoke(_reproductiveUrge);
+            }
+        }
+
+        public delegate void UShortChanged(ushort newValue);
+        public event UShortChanged? OnHealthChanged;
+        public event UShortChanged? OnThirstChanged;
+        public event UShortChanged? OnHungerChanged;
+        public event UShortChanged? OnReproductiveUrgeChanged;
+        
+        
         public EntityInfo(ushort maxHealth, ushort maxThirst, ushort maxHunger, ushort maxReproductiveUrge, ushort maxSensorRange)
         {
             MaxHealth = maxHealth;

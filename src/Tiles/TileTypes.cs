@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Raylib_cs;
 
-namespace Simulation_CSharp.Src.Tiles
+namespace Simulation_CSharp.Tiles
 {
     public class TileTypes
     {

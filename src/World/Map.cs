@@ -1,18 +1,25 @@
 ﻿using System.Collections.Generic;
 using System.Security.Cryptography;
-using Simulation_CSharp.Src.Tiles;
+using Simulation_CSharp.Tiles;
 
-namespace Simulation_CSharp.Src.World
+namespace Simulation_CSharp.World
 {
     public class Map
     {
         private readonly Dictionary<TileCell, Tile> _tiles;
         private readonly List<Tile> _decorations;
 
-        public Map()
+        public readonly int WorldWidth;
+        public readonly int WorldHeight;
+
+        public Map(int worldWidth, int worldHeight)
         {
+            WorldWidth = worldWidth;
+            WorldHeight = worldHeight;
+            
             _tiles = new Dictionary<TileCell, Tile>();
             _decorations = new List<Tile>();
+            
             GenerateNew();
         }
         
@@ -23,9 +30,9 @@ namespace Simulation_CSharp.Src.World
             var noiseGenerator = new FastNoiseLite(RandomNumberGenerator.GetInt32(int.MinValue, int.MaxValue));
             noiseGenerator.SetNoiseType(FastNoiseLite.NoiseType.Perlin);
             
-            for (var x = 0; x < 255; x++)
+            for (var x = 0; x < WorldWidth; x++)
             {
-                for (var y = 0; y < 255; y++)
+                for (var y = 0; y < WorldHeight; y++)
                 {
                     var noiseValue = noiseGenerator.GetNoise(x, y);
                     var tileCell = new TileCell(x, y);

@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Numerics;
 using Raylib_cs;
-using Simulation_CSharp.Src.World;
+using Simulation_CSharp.World;
 
-namespace Simulation_CSharp.Src
+namespace Simulation_CSharp
 {
     public static class SimulationCore
     {
-        public static Level Level = new();
+        public static readonly Level Level = new();
 
         public static void Main(string[] args)
         {
@@ -15,18 +15,20 @@ namespace Simulation_CSharp.Src
             {
                 SaveLoad.Load(args[0]);
             }
-            catch (IndexOutOfRangeException) { }
-            
+            catch (IndexOutOfRangeException)
+            {
+            }
+
             Raylib.SetConfigFlags(ConfigFlags.FLAG_WINDOW_RESIZABLE);
             Raylib.InitWindow(800, 480, "Simulation of Ecosystem");
-            
+
             var screenWidth = Raylib.GetScreenWidth();
             var screenHeight = Raylib.GetScreenHeight();
-            var camera = new Camera2D(new Vector2(screenWidth/2f, screenHeight/2f), Vector2.Zero, 0, 1);
+            var camera = new Camera2D(new Vector2(screenWidth / 2f, screenHeight / 2f), Vector2.Zero, 0, 1);
             while (!Raylib.WindowShouldClose())
             {
                 Raylib.BeginDrawing();
-                Renderer.Render(ref camera);
+                Updater.Update(ref camera);
                 Raylib.EndDrawing();
             }
 
