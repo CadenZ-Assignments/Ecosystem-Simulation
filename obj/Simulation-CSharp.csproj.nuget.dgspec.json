@@ -1,31 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "G:\\OtherProject\\Simulation-CSharp\\Simulation-CSharp\\Simulation-CSharp.csproj": {}
+    "C:\\School\\Grade10\\ICS3U\\Simulation\\Ecosystem-Simulation\\Simulation-CSharp.csproj": {}
   },
   "projects": {
-    "G:\\OtherProject\\Simulation-CSharp\\Simulation-CSharp\\Simulation-CSharp.csproj": {
+    "C:\\School\\Grade10\\ICS3U\\Simulation\\Ecosystem-Simulation\\Simulation-CSharp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "G:\\OtherProject\\Simulation-CSharp\\Simulation-CSharp\\Simulation-CSharp.csproj",
+        "projectUniqueName": "C:\\School\\Grade10\\ICS3U\\Simulation\\Ecosystem-Simulation\\Simulation-CSharp.csproj",
         "projectName": "Simulation-CSharp",
-        "projectPath": "G:\\OtherProject\\Simulation-CSharp\\Simulation-CSharp\\Simulation-CSharp.csproj",
-        "packagesPath": "C:\\Users\\w1nte\\.nuget\\packages\\",
-        "outputPath": "G:\\OtherProject\\Simulation-CSharp\\Simulation-CSharp\\obj\\",
+        "projectPath": "C:\\School\\Grade10\\ICS3U\\Simulation\\Ecosystem-Simulation\\Simulation-CSharp.csproj",
+        "packagesPath": "C:\\Users\\caden\\.nuget\\packages\\",
+        "outputPath": "C:\\School\\Grade10\\ICS3U\\Simulation\\Ecosystem-Simulation\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\w1nte\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\caden\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net6.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
