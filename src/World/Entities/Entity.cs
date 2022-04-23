@@ -1,4 +1,6 @@
-﻿using Simulation_CSharp.Core;
+﻿using Raylib_cs;
+using Simulation_CSharp.Core;
+using Simulation_CSharp.PathFinding;
 using Simulation_CSharp.Registry.Tiles;
 using Simulation_CSharp.World.Tiles;
 
@@ -9,12 +11,14 @@ public abstract class Entity
     // ReSharper disable once InconsistentNaming
     public readonly List<Gene> DNA;
     public readonly EntityInfo EntityInfo;
+    protected readonly AStarPathFinder<Tile> PathFinder;
     public TileCell Position = null!;
 
     protected Entity(EntityInfo entityInfo)
     {
         DNA = new List<Gene>();
         EntityInfo = entityInfo;
+        PathFinder = new AStarPathFinder<Tile>();
     }
 
     public void Destroy()
@@ -24,12 +28,30 @@ public abstract class Entity
 
     public abstract void Render();
 
+    public virtual void RefreshGoals()
+    {
+    }
+
     public virtual void Update()
     {
         if (Position.X is > Level.WorldWidth or < 0 || Position.Y is > Level.WorldHeight or < 0)
         {
             Destroy();
         }
+    }
+
+    protected List<TileCell> GoTo(ITileType type)
+    {
+        var tc = FindTile(type);
+        var map = SimulationCore.Level.Map;
+        
+        if (tc is not null)
+        {
+            PathFinder.Init(map.GetTileAtCell(Position)!, map.GetTileAtCell(tc)!, map.Tiles);
+            return PathFinder.FindPath();
+        }
+
+        return new List<TileCell>();
     }
 
     /// <summary>
@@ -39,12 +61,15 @@ public abstract class Entity
     /// <returns>The position of the closest tile, returns null if not found.</returns>
     protected TileCell? FindTile(ITileType tileType)
     {
-        for (var x = 0; x < EntityInfo.MaxSensorRange; x++)
+        var range = EntityInfo.MaxSensorRange / 2;
+        for (var x = -range; x < range; x++)
         {
-            for (var y = 0; y < EntityInfo.MaxSensorRange; y++)
+            for (var y = -range; y < range; y++)
             {
+                if (!SimulationCore.Level.Map.ExistInRange(Position.X + x, Position.Y + y)) continue;
+                
                 var tile = SimulationCore.Level.Map.GetTileAtCell(new TileCell(Position.X + x, Position.Y + y));
-                if (tile != null && tile.Type == tileType)
+                if (tile is not null && tile.Type == tileType)
                 {
                     return tile.Position;
                 }

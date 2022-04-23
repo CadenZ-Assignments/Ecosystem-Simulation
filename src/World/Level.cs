@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Raylib_cs;
+﻿using Raylib_cs;
 using Simulation_CSharp.World.Entities;
 using Simulation_CSharp.World.Tiles;
 
@@ -28,6 +26,7 @@ namespace Simulation_CSharp.World
 
             var entityCreated = entity.Invoke();
             entityCreated.Position = position;
+            entityCreated.RefreshGoals();
             Entities.Add(entityCreated);
         }
     }

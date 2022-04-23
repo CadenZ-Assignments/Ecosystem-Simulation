@@ -6,8 +6,8 @@ namespace Simulation_CSharp.World;
 
 public class Map
 {
-    private readonly Dictionary<TileCell, Tile> _tiles;
-    private readonly List<Tile> _decorations;
+    public readonly Dictionary<TileCell, Tile> Tiles;
+    public readonly List<Tile> Decorations;
 
     public readonly int WorldWidth;
     public readonly int WorldHeight;
@@ -17,15 +17,15 @@ public class Map
         WorldWidth = worldWidth;
         WorldHeight = worldHeight;
 
-        _tiles = new Dictionary<TileCell, Tile>();
-        _decorations = new List<Tile>();
+        Tiles = new Dictionary<TileCell, Tile>();
+        Decorations = new List<Tile>();
 
         GenerateNew();
     }
 
     public void GenerateNew()
     {
-        _tiles.Clear();
+        Tiles.Clear();
 
         var noiseGenerator = new FastNoiseLite(RandomNumberGenerator.GetInt32(int.MinValue, int.MaxValue));
         noiseGenerator.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
@@ -39,10 +39,10 @@ public class Map
                 switch (noiseValue)
                 {
                     case < 0:
-                        _tiles.Add(tileCell, new Tile(TileTypes.WaterTile, tileCell));
+                        Tiles.Add(tileCell, new Tile(TileTypes.WaterTile, tileCell));
                         break;
                     case >= 0:
-                        _tiles.Add(tileCell, new Tile(TileTypes.GrassTile, tileCell));
+                        Tiles.Add(tileCell, new Tile(TileTypes.GrassTile, tileCell));
                         break;
                 }
             }
@@ -51,7 +51,7 @@ public class Map
 
     public void Render()
     {
-        foreach (var tile in _tiles.Values)
+        foreach (var tile in Tiles.Values)
         {
             tile.Render();
         }
@@ -61,11 +61,16 @@ public class Map
     {
         try
         {
-            return _tiles[cell];
+            return Tiles[cell];
         }
         catch (KeyNotFoundException)
         {
             return null;
         }
+    }
+    
+    public bool ExistInRange(int x, int y)
+    {
+        return x > 0 && y > 0 && x < WorldWidth && y < WorldHeight;
     }
 }

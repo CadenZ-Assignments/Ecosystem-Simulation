@@ -1,6 +1,8 @@
 ﻿using System.Numerics;
 using Raylib_cs;
+using Simulation_CSharp.PathFinding;
 using Simulation_CSharp.World;
+using Simulation_CSharp.World.Tiles;
 
 namespace Simulation_CSharp.Core;
 
@@ -24,6 +26,7 @@ public static class SimulationCore
         var screenWidth = Raylib.GetScreenWidth();
         var screenHeight = Raylib.GetScreenHeight();
         var camera = new Camera2D(new Vector2(screenWidth / 2f, screenHeight / 2f), Vector2.Zero, 0, 1);
+
         while (!Raylib.WindowShouldClose())
         {
             Raylib.BeginDrawing();

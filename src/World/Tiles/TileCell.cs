@@ -13,23 +13,23 @@ public class TileCell
     private const float StartingX = 20;
     private const float StartingY = 20;
 
-    public Vector2 TruePosition;
-    public int X;
-    public int Y;
+    public readonly Vector2 TruePosition;
+    public readonly int X;
+    public readonly int Y;
 
     public TileCell(int x, int y)
     {
         X = x;
         Y = y;
-            
-        GenerateTruePosition();
+        TruePosition = GenerateTruePosition();
     }
 
     public TileCell(Vector2 truePosition)
     {
         TruePosition = truePosition;
-
-        GenerateXY();
+        var xy = GenerateXY();
+        X = xy.Item1;
+        Y = xy.Item2;
     }
 
     public float Distance(TileCell other)
@@ -44,52 +44,50 @@ public class TileCell
     }
 
     // ReSharper disable once InconsistentNaming
-    public void GenerateXY()
+    public (int, int) GenerateXY()
     {
-        GenerateXY(TruePosition);
+        return GenerateXY(TruePosition);
     }
 
     // ReSharper disable once InconsistentNaming
-    private void GenerateXY(Vector2 vector2)
+    public static (int, int) GenerateXY(Vector2 vector2)
     {
         var x = vector2.X;
         x -= StartingX;
         x *= 2;
         x /= CellSideLength;
 
-        X = (int) x;
-
         var y = vector2.Y;
         y -= StartingY;
         y *= 2;
         y /= CellSideLength;
 
-        Y = (int) y;
+        return ((int) x, (int) y);
     }
 
-    public void GenerateTruePosition()
+    public Vector2 GenerateTruePosition()
     {
-        GenerateTruePosition(X, Y);
-    }
-        
-    private void GenerateTruePosition(int x, int y)
-    {
-        TruePosition = new Vector2(StartingX + x * CellSideLength / 2, StartingY + y * CellSideLength / 2);
+        return GenerateTruePosition(X, Y);
     }
     
-    public static bool operator ==(TileCell a, TileCell b)
+    public static Vector2 GenerateTruePosition(int x, int y)
     {
-        return a.X == b.X && a.Y == b.Y;
+        return new Vector2(StartingX + x * CellSideLength / 2, StartingY + y * CellSideLength / 2);
     }
     
-    public static bool operator !=(TileCell a, TileCell b)
+    public static bool operator ==(TileCell? a, TileCell? b)
     {
-        return a.X != b.X || a.Y != b.Y;
+        return a is not null && b is not null && a.X == b.X && a.Y == b.Y;
+    }
+    
+    public static bool operator !=(TileCell? a, TileCell? b)
+    {
+        return a is null || b is null || a.X != b.X || a.Y != b.Y;
     }
     
     protected bool Equals(TileCell other)
     {
-        return TruePosition.Equals(other.TruePosition) && X == other.X && Y == other.Y;
+        return X == other.X && Y == other.Y;
     }
 
     public override bool Equals(object? obj)
@@ -102,6 +100,6 @@ public class TileCell
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(TruePosition, X, Y);
+        return HashCode.Combine(X, Y);
     }
 }

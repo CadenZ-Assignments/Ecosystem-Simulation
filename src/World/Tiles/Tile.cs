@@ -1,5 +1,5 @@
-﻿using Simulation_CSharp.Registry.Tiles;
-using Simulation_CSharp.World.Tiles.PathFinding;
+﻿using Simulation_CSharp.PathFinding;
+using Simulation_CSharp.Registry.Tiles;
 
 namespace Simulation_CSharp.World.Tiles;
 
