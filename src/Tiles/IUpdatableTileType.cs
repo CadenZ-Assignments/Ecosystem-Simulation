@@ -2,5 +2,5 @@
 
 public interface IUpdatableTileType
 {
-    
+    public void Update();
 }

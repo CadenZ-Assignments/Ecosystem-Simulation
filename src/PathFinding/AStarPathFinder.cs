@@ -117,6 +117,12 @@ public class AStarPathFinder<T> : IPathFindingAgent<T> where T : Node
         return new List<TileCell>();
     }
 
+    public List<TileCell> FindPath(Node start, Node end, Dictionary<TileCell, T> map)
+    {
+        Init(start, end, map);
+        return FindPath();
+    }
+
     private static void RetracePath(Node baseNode, ICollection<TileCell> parents)
     {
         if (baseNode.Parent is null)

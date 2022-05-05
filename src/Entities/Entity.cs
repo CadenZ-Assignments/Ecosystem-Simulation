@@ -1,53 +1,57 @@
-﻿using Raylib_cs;
-using Simulation_CSharp.Core;
-using Simulation_CSharp.PathFinding;
+﻿using Simulation_CSharp.Core;
+using Simulation_CSharp.Entities.AI;
 using Simulation_CSharp.Tiles;
+using Simulation_CSharp.World;
 
-namespace Simulation_CSharp.World.Entities;
+namespace Simulation_CSharp.Entities;
 
 public abstract class Entity
 {
     // ReSharper disable once InconsistentNaming
-    public readonly List<Gene> DNA;
+    protected readonly List<Gene> DNA;
+    protected readonly Lazy<Brain> Brain;
     public readonly EntityInfo EntityInfo;
-    protected readonly IPathFindingAgent<Tile> PathFinder;
     public TileCell Position = null!;
 
-    protected Entity(EntityInfo entityInfo, IPathFindingAgent<Tile> pathFinder)
+    protected Entity(EntityInfo entityInfo)
     {
         DNA = new List<Gene>();
         EntityInfo = entityInfo;
-        PathFinder = pathFinder;
+        Brain = new Lazy<Brain>(CreateBrain);
     }
+    
+    public abstract void Render();
+
+    protected abstract Brain CreateBrain();
 
     public void Destroy()
     {
-        SimulationCore.Level.RemovalQueue.Enqueue(this);
+        SimulationCore.Level.RemoveEntity(this);
     }
-
-    public abstract void Render();
-
-    public virtual void RefreshGoals()
+    
+    public void RefreshGoals()
     {
+        Brain.Value.RefreshGoal();
     }
 
     public virtual void Update()
     {
+        Brain.Value.Update();
         if (Position.X is > Level.WorldWidth or < 0 || Position.Y is > Level.WorldHeight or < 0)
         {
             Destroy();
         }
     }
-
-    protected List<TileCell> GoTo(ITileType type)
+    
+    public List<TileCell> GoTo(ITileType type)
     {
         var tc = FindTile(type);
-        var map = SimulationCore.Level.Map;
+        var map = SimulationCore.Level.GetMap();
         
         if (tc is not null)
         {
-            PathFinder.Init(map.GetTileAtCell(Position)!, map.GetTileAtCell(tc)!, map.Tiles);
-            return PathFinder.FindPath();
+            Brain.Value.PathFinder.Init(map.GetTileAtCell(Position)!, map.GetTileAtCell(tc)!, map.GetGrid());
+            return Brain.Value.PathFinder.FindPath();
         }
 
         return new List<TileCell>();
@@ -67,8 +71,8 @@ public abstract class Entity
         {
             for (var y = -range; y < range; y++)
             {
-                if (!SimulationCore.Level.Map.ExistInRange(Position.X + x, Position.Y + y)) continue;
-                var tile = SimulationCore.Level.Map.GetTileAtCell(new TileCell(Position.X + x, Position.Y + y));
+                if (!SimulationCore.Level.GetMap().ExistInRange(Position.X + x, Position.Y + y)) continue;
+                var tile = SimulationCore.Level.GetMap().GetTileAtCell(new TileCell(Position.X + x, Position.Y + y));
                 
                 if (tile is null || tile.Type != tileType) continue;
                 

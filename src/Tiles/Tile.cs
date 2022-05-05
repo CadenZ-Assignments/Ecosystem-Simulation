@@ -18,4 +18,12 @@ public class Tile : Node
     {
         Type.Render(Position);
     }
+
+    public void Update()
+    {
+        if (Type is IUpdatableTileType type)
+        {
+            type.Update();
+        }
+    }
 }

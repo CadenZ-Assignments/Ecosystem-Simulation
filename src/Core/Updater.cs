@@ -1,9 +1,7 @@
 ﻿using System.Numerics;
 using Raylib_cs;
 using Simulation_CSharp.Entities;
-using Simulation_CSharp.PathFinding;
 using Simulation_CSharp.Tiles;
-using Simulation_CSharp.World.Entities;
 
 namespace Simulation_CSharp.Core;
 
@@ -23,33 +21,24 @@ public static class Updater
 
     private static void RenderEntities()
     {
-        SimulationCore.Level.Entities.ForEach(entity =>
+        SimulationCore.Level.GetEntities().ForEach(entity =>
         {
             entity.Render();
             entity.Update();
         });
-        var removalQueue = SimulationCore.Level.RemovalQueue;
-        for (var i = 0; i < removalQueue.Count; i++)
-        {
-            SimulationCore.Level.Entities.Remove(removalQueue.Dequeue());
-            Raylib.TraceLog(TraceLogLevel.LOG_INFO, "Removed Entity");
-        }
+        SimulationCore.Level.CleanEntityRemovalQueue();
     }
         
     private static void RenderMap()
     {
-        SimulationCore.Level.Map.Render();
+        SimulationCore.Level.GetMap().Render();
     }
 
     private static void RenderHud()
     {
         Raylib.DrawFPS(20, 20);
     }
-
-        
-        
-        
-        
+    
     private const float MinZoomValue = 0.1f;
     private static float _scrollMovement = 1;
 
@@ -87,7 +76,7 @@ public static class Updater
         // Middle click generates a new map. For debugging purposes 
         if (Raylib.IsKeyDown(KeyboardKey.KEY_F))
         {
-            SimulationCore.Level.Map.GenerateNew();
+            SimulationCore.Level.GetMap().GenerateNew();
         }
 
         if (Raylib.IsKeyDown(KeyboardKey.KEY_R))

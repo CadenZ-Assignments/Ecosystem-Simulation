@@ -1,18 +1,19 @@
 ﻿using System.Numerics;
 using Raylib_cs;
-using Simulation_CSharp.PathFinding;
 using Simulation_CSharp.World;
 
 namespace Simulation_CSharp.Core;
 
 public static class SimulationCore
 {
-    public static readonly Level Level = new();
+    public static ILevel Level = null!;
 
     public static void Main(string[] args)
     {
+        Level = new Level();
+        
         Raylib.SetConfigFlags(ConfigFlags.FLAG_WINDOW_RESIZABLE);
-        Raylib.InitWindow(800, 480, "Simulation of Ecosystem");
+        Raylib.InitWindow(800, 480, "Simulation Engine");
 
         var screenWidth = Raylib.GetScreenWidth();
         var screenHeight = Raylib.GetScreenHeight();

@@ -3,9 +3,10 @@ using Simulation_CSharp.Tiles;
 
 namespace Simulation_CSharp.World;
 
-public class Map
+public class Map : IMap
 {
     public readonly Dictionary<TileCell, Tile> Tiles;
+    public readonly List<Tile> UpdatableTiles;
     public readonly List<Tile> Decorations;
 
     public readonly int WorldWidth;
@@ -17,6 +18,7 @@ public class Map
         WorldHeight = worldHeight;
 
         Tiles = new Dictionary<TileCell, Tile>();
+        UpdatableTiles = new List<Tile>();
         Decorations = new List<Tile>();
 
         GenerateNew();
@@ -40,6 +42,19 @@ public class Map
         return x > 0 && y > 0 && x < WorldWidth && y < WorldHeight;
     }
 
+    public void Render()
+    {
+        foreach (var tile in Tiles.Values)
+        {
+            tile.Render();
+        }
+
+        foreach (var updatableTile in UpdatableTiles)
+        {
+            updatableTile.Update();
+        }
+    }
+    
     public void GenerateNew()
     {
         Tiles.Clear();
@@ -56,21 +71,28 @@ public class Map
                 switch (noiseValue)
                 {
                     case < 0:
-                        Tiles.Add(tileCell, TileTypes.WaterTile.CreateTile(tileCell));
+                        AddTile(tileCell, TileTypes.WaterTile);
                         break;
                     case >= 0:
-                        Tiles.Add(tileCell, TileTypes.GrassTile.CreateTile(tileCell));
+                        AddTile(tileCell, TileTypes.GrassTile);
                         break;
                 }
             }
         }
     }
 
-    public void Render()
+    public Dictionary<TileCell, Tile> GetGrid()
     {
-        foreach (var tile in Tiles.Values)
+        return Tiles;
+    }
+
+    private void AddTile(TileCell cell, ITileType tileType)
+    {
+        var tile = tileType.CreateTile(cell);
+        Tiles.Add(cell, tile);
+        if (tileType is IUpdatableTileType)
         {
-            tile.Render();
+            UpdatableTiles.Add(tile);
         }
     }
 }
