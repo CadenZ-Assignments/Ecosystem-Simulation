@@ -1,10 +1,12 @@
-﻿using Simulation_CSharp.World.Tiles;
+﻿using Simulation_CSharp.Tiles;
 
 namespace Simulation_CSharp.PathFinding;
 
-public class AStarPathFinder<T> where T : Node
+public class AStarPathFinder<T> : IPathFindingAgent<T> where T : Node
 {
-    private Dictionary<TileCell, T>? _map;
+    private const bool IgnoreGCost = false;
+    
+    private Dictionary<TileCell, T>? _grid;
     private List<Node>? _openSet;
     private List<Node>? _closedSet;
     private Node? _start;
@@ -14,108 +16,146 @@ public class AStarPathFinder<T> where T : Node
     private int _boundX2;
     private int _boundY2;
 
-    public void Init(Node start, Node end, Dictionary<TileCell, T> map)
+    public void Init(Node start, Node end, Dictionary<TileCell, T> grid)
     {
-        _map = map;
+        _grid = grid;
         _start = start;
         _end = end;
         _openSet = new List<Node>();
         _closedSet = new List<Node>();
+        _openSet.Add(_start);
 
-        // no need to evaluate the entire map. only evaluate nodes within a box that will be used by path finding but if no valid path is found we search in a bigger grid.
         var startPos = _start.Position;
         var endPos = _end.Position;
 
+        // no need to evaluate the entire map. only evaluate nodes within a box that will be used by path finding but if no valid path is found we search in a bigger grid.
         // the 2 corners
-        var x1 = Math.Min(startPos.X, endPos.X);
-        var y1 = Math.Min(startPos.Y, endPos.Y);
-        var x2 = Math.Max(startPos.X, endPos.X);
-        var y2 = Math.Max(startPos.Y, endPos.Y);
-
-        InitializeGrid(x1, y1, x2, y2);
+        _boundX1 = Math.Min(startPos.X, endPos.X);
+        _boundY1 = Math.Min(startPos.Y, endPos.Y);
+        _boundX2 = Math.Max(startPos.X, endPos.X);
+        _boundY2 = Math.Max(startPos.Y, endPos.Y);
     }
 
     public List<TileCell> FindPath()
     {
-        if (_openSet is null || _closedSet is null || _start is null || _end is null)
+        if (_grid is null || _openSet is null || _closedSet is null || _start is null || _end is null)
         {
-            throw new Exception("Init must be called before Find Path is called");
+            throw new Exception("Tried to path find without initializing required variables");
         }
-        
-        var output = new List<TileCell>();
 
-        var current = _start;
-        _openSet.Add(current);
+        var path = new List<TileCell>();
 
-        while (_openSet.Any() && current != _end)
+        // still have cells left to evaluate
+        while (_openSet.Count > 0)
         {
-            foreach (var node in GetNeighbors(current).Where(node => !_openSet.Contains(node)))
-            {
-                _openSet.Add(node);
-            }
+            // find the cell with the lowest F value
+            var winningIndex = 0;
 
-            _openSet.Remove(current);
-            _closedSet.Add(current);
-                
-            foreach (var openNode in _openSet.Where(openNodes => openNodes.Initialized && !_closedSet.Contains(openNodes)))
+            for (var i = 0; i < _openSet.Count; i++)
             {
-                if (openNode.FCost < current.FCost)
+                if (_openSet[i].FCost < _openSet[winningIndex].FCost)
                 {
-                    current = openNode;
+                    winningIndex = i;
                 }
             }
+
+            var winningCell = _openSet[winningIndex];
+
+            // needs to reset path before calling retrace path because retrace path does not clear the path array. It only adds path to it.
+            path.Clear();
+            RetracePath(winningCell, path);
+
+            if (winningCell == _end)
+            {
+                // clear out the open set as we are done.
+                _openSet = null;
+                _closedSet = null;
+                
+                path.Clear();
+                RetracePath(winningCell, path);
+
+                // add the end cell to path as well because retracePath does not add the base position to the array
+                path.Add(winningCell.Position);
+                
+                return path;
+            }
+
+            // basically removes the winning cell from the open set
+            _openSet.Remove(winningCell);
+            _closedSet.Add(winningCell);
+
+            var neighbors = GetNeighbors(winningCell);
+            
+            foreach (var neighbor in neighbors.Where(neighbor => !neighbor.IsObstructed).Where(neighbor => !_closedSet.Contains(neighbor)))
+            {
+                var tempG = winningCell.GCost + neighbor.Position.Distance(winningCell.Position);
+                var newG = false;
+                
+                // if _openSet contains
+                if (_openSet.Contains(neighbor))
+                {
+                    if (tempG < neighbor.GCost)
+                    {
+                        neighbor.GCost = tempG;
+                        newG = true;
+                    }
+                }
+                else
+                {
+                    neighbor.GCost = tempG;
+                    newG = true;
+                    _openSet.Add(neighbor);
+                }
+
+                if (!newG) continue;
+                neighbor.HCost = neighbor.Position.Distance(_end.Position);
+                neighbor.FCost = IgnoreGCost ? neighbor.HCost : neighbor.GCost + neighbor.HCost;
+                neighbor.Parent = winningCell;
+            }
         }
 
-        AddParent(current, output);
-        
-        foreach (var closedNode in _closedSet)
-        {
-            closedNode.UnInitializeCosts();
-        }
-        
-        output.Reverse();
-        return output;
+        return new List<TileCell>();
     }
 
-    private static void AddParent(Node baseNode, ICollection<TileCell> parents)
+    private static void RetracePath(Node baseNode, ICollection<TileCell> parents)
     {
         if (baseNode.Parent is null)
         {
             parents.Add(baseNode.Position);
             return;
         }
-        
+
         parents.Add(baseNode.Parent.Position);
-        AddParent(baseNode.Parent, parents);
+        RetracePath(baseNode.Parent, parents);
     }
 
-    private List<Node> GetNeighbors(Node node)
+    private IEnumerable<Node> GetNeighbors(Node node)
     {
-        if (_map is null)
+        if (_grid is null)
         {
             throw new Exception("Tried to initialize grid without initializing path finder");
         }
-        
+
         var neighbors = new List<Node>();
 
-        for (var i = -1; i <= 1; i++)
-        {
-            for (var j = -1; j <= 1; j++)
-            {
+        for (var i = -1; i <= 1; i++) {
+            for (var j = -1; j <= 1; j++) {
                 // the base node itself
-                if (i == 0 && j == 0)
-                {
+                if (i == 0 && j == 0) {
                     continue;
                 }
-                
+
+                // if (!corners && Math.abs(i) + Math.abs(j) > 1) {
+                    // continue;
+                // }
+
                 var x = node.Position.X + i;
                 var y = node.Position.Y + j;
                 var pos = new TileCell(x, y);
 
                 if (!ExistInRange(x, y)) continue;
 
-                _map[pos].Parent = node;
-                neighbors.Add(_map[pos]);
+                neighbors.Add(_grid[pos]);
             }
         }
 
@@ -125,31 +165,5 @@ public class AStarPathFinder<T> where T : Node
     private bool ExistInRange(int x, int y)
     {
         return x > 0 && y > 0 && x >= _boundX1 && y >= _boundY1 && x <= _boundX2 && y <= _boundY2;
-    }
-
-    private void InitializeGrid(int x1, int y1, int x2, int y2)
-    {
-        if (_map is null || _start is null || _end is null)
-        {
-            throw new Exception("Tried to initialize grid without initializing map");
-        }
-
-        _boundX1 = x1;
-        _boundY1 = y1;
-        _boundX2 = x2;
-        _boundY2 = y2;
-
-        for (var i = x1; i <= x2; i++)
-        {
-            for (var j = y1; j <= y2; j++)
-            {
-                var pos = new TileCell(i, j);
-                if (_map.ContainsKey(pos))
-                {
-                    // initialize costs for all required nodes.
-                    _map[pos].InitializeCosts(_start.Position.Distance(pos), _end.Position.Distance(pos));
-                }
-            }
-        }
     }
 }

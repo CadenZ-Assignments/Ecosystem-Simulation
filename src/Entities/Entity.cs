@@ -1,8 +1,7 @@
 ﻿using Raylib_cs;
 using Simulation_CSharp.Core;
 using Simulation_CSharp.PathFinding;
-using Simulation_CSharp.Registry.Tiles;
-using Simulation_CSharp.World.Tiles;
+using Simulation_CSharp.Tiles;
 
 namespace Simulation_CSharp.World.Entities;
 
@@ -11,14 +10,14 @@ public abstract class Entity
     // ReSharper disable once InconsistentNaming
     public readonly List<Gene> DNA;
     public readonly EntityInfo EntityInfo;
-    protected readonly AStarPathFinder<Tile> PathFinder;
+    protected readonly IPathFindingAgent<Tile> PathFinder;
     public TileCell Position = null!;
 
-    protected Entity(EntityInfo entityInfo)
+    protected Entity(EntityInfo entityInfo, IPathFindingAgent<Tile> pathFinder)
     {
         DNA = new List<Gene>();
         EntityInfo = entityInfo;
-        PathFinder = new AStarPathFinder<Tile>();
+        PathFinder = pathFinder;
     }
 
     public void Destroy()
@@ -62,20 +61,27 @@ public abstract class Entity
     protected TileCell? FindTile(ITileType tileType)
     {
         var range = EntityInfo.MaxSensorRange / 2;
+        TileCell? bestSoFar = null;
+        
         for (var x = -range; x < range; x++)
         {
             for (var y = -range; y < range; y++)
             {
                 if (!SimulationCore.Level.Map.ExistInRange(Position.X + x, Position.Y + y)) continue;
-                
                 var tile = SimulationCore.Level.Map.GetTileAtCell(new TileCell(Position.X + x, Position.Y + y));
-                if (tile is not null && tile.Type == tileType)
+                
+                if (tile is null || tile.Type != tileType) continue;
+                
+                if (bestSoFar is null)
                 {
-                    return tile.Position;
+                    bestSoFar = tile.Position;
+                } else if (tile.Position.Distance(Position) < bestSoFar.Distance(Position))
+                {
+                    bestSoFar = tile.Position;
                 }
             }
         }
 
-        return null;
+        return bestSoFar;
     }
 }

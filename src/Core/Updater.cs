@@ -1,8 +1,9 @@
 ﻿using System.Numerics;
 using Raylib_cs;
+using Simulation_CSharp.Entities;
 using Simulation_CSharp.PathFinding;
+using Simulation_CSharp.Tiles;
 using Simulation_CSharp.World.Entities;
-using Simulation_CSharp.World.Tiles;
 
 namespace Simulation_CSharp.Core;
 

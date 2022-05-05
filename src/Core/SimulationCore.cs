@@ -2,7 +2,6 @@
 using Raylib_cs;
 using Simulation_CSharp.PathFinding;
 using Simulation_CSharp.World;
-using Simulation_CSharp.World.Tiles;
 
 namespace Simulation_CSharp.Core;
 
@@ -12,14 +11,6 @@ public static class SimulationCore
 
     public static void Main(string[] args)
     {
-        try
-        {
-            SaveLoad.Load(args[0]);
-        }
-        catch (IndexOutOfRangeException)
-        {
-        }
-
         Raylib.SetConfigFlags(ConfigFlags.FLAG_WINDOW_RESIZABLE);
         Raylib.InitWindow(800, 480, "Simulation of Ecosystem");
 

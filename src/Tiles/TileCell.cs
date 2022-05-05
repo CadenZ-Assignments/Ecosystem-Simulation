@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace Simulation_CSharp.World.Tiles;
+namespace Simulation_CSharp.Tiles;
 
 public class TileCell
 {

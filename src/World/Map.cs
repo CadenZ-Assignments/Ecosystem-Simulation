@@ -1,6 +1,5 @@
 ﻿using System.Security.Cryptography;
-using Simulation_CSharp.Registry.Tiles;
-using Simulation_CSharp.World.Tiles;
+using Simulation_CSharp.Tiles;
 
 namespace Simulation_CSharp.World;
 
@@ -23,6 +22,24 @@ public class Map
         GenerateNew();
     }
 
+    public void SetTileAtCell(ITileType tileType, TileCell cell)
+    {
+        if (ExistInRange(cell.X, cell.Y))
+        {
+            Tiles[cell].Type = tileType;
+        }
+    }
+    
+    public Tile? GetTileAtCell(TileCell cell)
+    {
+        return ExistInRange(cell.X, cell.Y) ? Tiles[cell] : null;
+    }
+    
+    public bool ExistInRange(int x, int y)
+    {
+        return x > 0 && y > 0 && x < WorldWidth && y < WorldHeight;
+    }
+
     public void GenerateNew()
     {
         Tiles.Clear();
@@ -39,10 +56,10 @@ public class Map
                 switch (noiseValue)
                 {
                     case < 0:
-                        Tiles.Add(tileCell, new Tile(TileTypes.WaterTile, tileCell));
+                        Tiles.Add(tileCell, TileTypes.WaterTile.CreateTile(tileCell));
                         break;
                     case >= 0:
-                        Tiles.Add(tileCell, new Tile(TileTypes.GrassTile, tileCell));
+                        Tiles.Add(tileCell, TileTypes.GrassTile.CreateTile(tileCell));
                         break;
                 }
             }
@@ -55,22 +72,5 @@ public class Map
         {
             tile.Render();
         }
-    }
-
-    public Tile? GetTileAtCell(TileCell cell)
-    {
-        try
-        {
-            return Tiles[cell];
-        }
-        catch (KeyNotFoundException)
-        {
-            return null;
-        }
-    }
-    
-    public bool ExistInRange(int x, int y)
-    {
-        return x > 0 && y > 0 && x < WorldWidth && y < WorldHeight;
     }
 }

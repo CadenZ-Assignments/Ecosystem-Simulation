@@ -1,46 +1,26 @@
-﻿using Simulation_CSharp.World.Tiles;
+﻿using Simulation_CSharp.Tiles;
 
 namespace Simulation_CSharp.PathFinding;
 
 public class Node
 {
     public readonly TileCell Position;
-    public float GCost { get; private set; } // distance from starting node
-    public float HCost { get; private set; } // distance from ending node
-    public float FCost { get; private set; } // G + H = F
-    public bool Initialized { get; private set; }
-    public Node? Parent = null;
+    public float GCost; // distance from starting node
+    public float HCost; // distance from ending node
+    public float FCost; // G + H = F
+    public Node? Parent;
+    public bool IsObstructed;
     
     public Node(TileCell position)
     {
         Position = position;
-    }
-
-    public Node(Node copyFrom)
-    {
-        Position = copyFrom.Position;
-        GCost = copyFrom.GCost;
-        HCost = copyFrom.HCost;
-        FCost = copyFrom.FCost;
-        Initialized = copyFrom.Initialized;
-    }
-    
-    public void InitializeCosts(float gCost, float hCost)
-    {
-        GCost = gCost;
-        HCost = hCost;
-        FCost = gCost + hCost;
-        Initialized = true;
-    }
-
-    public void UnInitializeCosts()
-    {
         GCost = 0;
         HCost = 0;
         FCost = 0;
-        Initialized = false;
+        Parent = null;
+        IsObstructed = false;
     }
-    
+
     public static bool operator ==(Node? a, Node? b)
     {
         return a is not null && b is not null && a.Position == b.Position;
