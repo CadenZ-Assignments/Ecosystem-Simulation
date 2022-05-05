@@ -1,4 +1,4 @@
-﻿namespace Simulation_CSharp.Entities;
+﻿namespace Simulation_CSharp.Entities.Inheritance;
 
 public class EntityInfo
 {
