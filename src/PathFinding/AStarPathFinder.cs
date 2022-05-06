@@ -82,6 +82,10 @@ public class AStarPathFinder<T> : IPathFindingAgent<T> where T : Node
                 path.Clear();
                 RetracePath(winningCell, path);
                 path.Reverse();
+                
+                // for whatever reason the last element gets added twice so we remove it
+                path.RemoveAt(0);
+                
                 // add the end cell to path as well because retracePath does not add the base position to the array
                 path.Add(winningCell.Position);
 
@@ -133,13 +137,14 @@ public class AStarPathFinder<T> : IPathFindingAgent<T> where T : Node
 
     private static void RetracePath(Node baseNode, ICollection<TileCell> parents)
     {
-        var temp = baseNode;
-        parents.Add(temp.Position);
-        while (temp.Parent is not null)
+        if (baseNode.Parent is null)
         {
-           parents.Add(temp.Parent.Position);
-           temp = temp.Parent;
+            parents.Add(baseNode.Position);
+            return;
         }
+        
+        parents.Add(baseNode.Parent.Position);
+        RetracePath(baseNode.Parent, parents);
     }
 
     private IEnumerable<Node> GetNeighbors(Node node)

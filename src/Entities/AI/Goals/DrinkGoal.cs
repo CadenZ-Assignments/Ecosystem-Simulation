@@ -29,13 +29,11 @@ public class DrinkGoal : TileTypeGoal
 
     public override bool CanPick()
     {
-        // return Entity.IsBelowTolerance(Entity.Thirst);
-        return true;
+        return Entity.IsBelowTolerance(Entity.Thirst);
     }
 
     public override bool ShouldResume()
     {
-        // return base.ShouldResume() && Entity.IsBelowTolerance(Entity.Thirst);
-        return true;
+        return Entity.IsBelowTolerance(Entity.Thirst);
     }
 }

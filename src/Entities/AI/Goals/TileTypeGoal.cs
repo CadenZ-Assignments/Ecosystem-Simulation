@@ -36,8 +36,8 @@ public class TileTypeGoal : Goal
         for (var i = 0; i < _path.Count; i++)
         {
             var st = _path[i];
-            Raylib.DrawCircle((int) st.TruePosition.X, (int) st.TruePosition.Y, 5, Color.BLUE);
-            Raylib.DrawText(i.ToString(), (int) st.TruePosition.X + 5, (int) st.TruePosition.Y + 5, 2, Color.WHITE);
+            Raylib.DrawCircle((int) st.TruePosition.X, (int) st.TruePosition.Y, 5, Color.YELLOW);
+            Raylib.DrawText(i.ToString(), (int) st.TruePosition.X, (int) st.TruePosition.Y, 2, Color.BLACK);
         }
 
         var stepPos = _path[_step];
@@ -45,7 +45,7 @@ public class TileTypeGoal : Goal
         // moves entity towards the next step's position
         Entity.MoveTowardsLocation(stepPos.TruePosition);
         // if we are close enough to this step then we move towards the next step
-        if (!(Entity.Position.Distance(stepPos) < 1.5)) return;
+        if (!(Entity.Position.Distance(stepPos) < 0.5)) return;
         _step++;
     }
     

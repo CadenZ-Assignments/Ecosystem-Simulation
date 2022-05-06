@@ -3,7 +3,6 @@ using Raylib_cs;
 using Simulation_CSharp.Core;
 using Simulation_CSharp.Entities.AI;
 using Simulation_CSharp.Entities.Inheritance;
-using Simulation_CSharp.PathFinding;
 using Simulation_CSharp.Tiles;
 using Simulation_CSharp.Utils;
 using Simulation_CSharp.World;
@@ -101,7 +100,7 @@ public abstract class Entity
         // draw hover tool tip if mouse is hovering
         if (!IsSelected && !Helper.IsMouseOverArea(mousePos, Position.TruePosition, texture2D.width, texture2D.height)) return;
 
-        var rectX = Position.TruePosition.X + 10;
+        var rectX = Position.TruePosition.X + 40;
         var rectY = Position.TruePosition.Y - 45;
         var rectWidth = 200;
         var rectHeight = 10;

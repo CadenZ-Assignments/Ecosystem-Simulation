@@ -24,7 +24,7 @@ public class SheepEntity : Entity
     {
         var brain = new Brain(this, new AStarPathFinder<Tile>());
         brain.RegisterGoal(new DrinkGoal(5, this, brain));
-        // brain.RegisterGoal(new RandomWalkGoal(0, this, brain));
+        brain.RegisterGoal(new RandomWalkGoal(0, this, brain));
         return brain;
     }
 }
