@@ -9,7 +9,7 @@ public class RandomWalkGoal : Goal
     private int _direction;
     private Vector2 _targetPos;
 
-    public RandomWalkGoal(int priority, Entity entity, Brain brain) : base(priority, false, entity, brain)
+    public RandomWalkGoal(int priority, Entity entity, Brain brain) : base(priority, false, entity, brain, "Wondering")
     {
     }
 

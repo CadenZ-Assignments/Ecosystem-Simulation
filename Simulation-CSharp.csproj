@@ -15,4 +15,9 @@
       <PackageReference Include="Raylib-cs" Version="4.0.0.1" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="resources\textures\entities" />
+      <Folder Include="resources\textures\tiles" />
+    </ItemGroup>
+
 </Project>

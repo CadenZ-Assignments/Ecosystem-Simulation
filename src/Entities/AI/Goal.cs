@@ -1,19 +1,23 @@
-﻿namespace Simulation_CSharp.Entities.AI;
+﻿using Raylib_cs;
+
+namespace Simulation_CSharp.Entities.AI;
 
 public abstract class Goal
 {
+    public string StatusText;
     public readonly int Priority;
     public readonly bool CanOverrideRandomness;
     protected readonly Brain Brain;
     protected readonly Entity Entity;
     public bool Completed;
-    
-    protected Goal(int priority, bool canOverrideRandomness, Entity entity, Brain brain)
+
+    protected Goal(int priority, bool canOverrideRandomness, Entity entity, Brain brain, string statusText)
     {
         Priority = priority;
         CanOverrideRandomness = canOverrideRandomness;
         Entity = entity;
         Brain = brain;
+        StatusText = statusText;
     }
 
     /// <summary>
@@ -58,6 +62,7 @@ public abstract class Goal
         if (!OnCompleted()) return;
         Completed = true;
         Brain.GoalCompleted();
+        Raylib.TraceLog(TraceLogLevel.LOG_INFO, "Completed goal of " + StatusText);
     }
 
     /// <summary>
@@ -66,5 +71,6 @@ public abstract class Goal
     public void ResumeGoal()
     {
         Completed = false;
+        Raylib.TraceLog(TraceLogLevel.LOG_INFO, "Resumed goal of " + StatusText);
     }
 }

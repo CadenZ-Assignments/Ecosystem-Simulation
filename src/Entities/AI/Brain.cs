@@ -1,4 +1,5 @@
-﻿using Simulation_CSharp.PathFinding;
+﻿using Raylib_cs;
+using Simulation_CSharp.PathFinding;
 using Simulation_CSharp.Tiles;
 using Simulation_CSharp.Utils;
 
@@ -42,11 +43,15 @@ public class Brain
         CurrentGoal = PickGoal();
         CurrentGoal?.OnPicked();
     }
+
+    public string GetStatus()
+    {
+        return CurrentGoal == null ? "Idling" : CurrentGoal.StatusText;
+    }
     
     protected virtual Goal? PickGoal()
     {
         Goal? picked = null;
-        var rand = new Random();
         
         foreach (var goal in Goals.Where(goal => goal.CanPick()))
         {
@@ -68,12 +73,21 @@ public class Brain
                 // have a chance (defined by genetics) to not pick the most important task at hand
                 if (Helper.Chance(Entity.Genetics.MaxRandomness))
                 {
-                    if (!goal.CanOverrideRandomness) continue;
+                    if (!goal.CanOverrideRandomness)
+                    {
+                        Raylib.TraceLog(TraceLogLevel.LOG_INFO, "Randomly skipped goal of " + goal.StatusText);
+                        continue;
+                    }
                 }
                 picked = goal;
             }
         }
 
+        if (picked != null)
+        {
+            Raylib.TraceLog(TraceLogLevel.LOG_INFO, "Picked new goal of " + picked.StatusText);
+        }
+        
         return picked;
     }
 }

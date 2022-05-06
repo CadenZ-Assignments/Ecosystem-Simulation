@@ -2,6 +2,7 @@
 using Raylib_cs;
 using Simulation_CSharp.Entities;
 using Simulation_CSharp.Tiles;
+using Simulation_CSharp.Utils;
 
 namespace Simulation_CSharp.Core;
 
@@ -49,12 +50,12 @@ public static class Updater
     {
         if (Raylib.IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT))
         {
-            _initialMousePos = GetWorldSpaceMousePos(ref camera);
+            _initialMousePos = Helper.GetWorldSpaceMousePos(ref camera);
         }
 
         if (Raylib.IsMouseButtonDown(MouseButton.MOUSE_BUTTON_LEFT))
         {
-            var tempSecondPos = GetWorldSpaceMousePos(ref camera);
+            var tempSecondPos = Helper.GetWorldSpaceMousePos(ref camera);
             if (_secondMousePos != tempSecondPos)
             {
                 camera.target += -(tempSecondPos - _initialMousePos);
@@ -86,7 +87,7 @@ public static class Updater
             
         if (Raylib.IsMouseButtonReleased(MouseButton.MOUSE_BUTTON_RIGHT))
         {
-            SimulationCore.Level.CreateEntity(() => new SheepEntity(), new TileCell(GetWorldSpaceMousePos(ref camera)));
+            SimulationCore.Level.CreateEntity(() => new SheepEntity(), new TileCell(Helper.GetWorldSpaceMousePos(ref camera)));
         }
 
         var value = Raylib.GetMouseWheelMove();
@@ -103,10 +104,5 @@ public static class Updater
                 _scrollMovement += value/2;
                 break;
         }
-    }
-
-    private static Vector2 GetWorldSpaceMousePos(ref Camera2D camera)
-    {
-        return Raylib.GetScreenToWorld2D(Raylib.GetMousePosition(), camera);
     }
 }

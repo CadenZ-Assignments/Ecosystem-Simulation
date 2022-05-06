@@ -21,6 +21,15 @@ public class Node
         IsObstructed = false;
     }
 
+    public void Reset()
+    {
+        GCost = 0;
+        HCost = 0;
+        FCost = 0;
+        Parent = null;
+        IsObstructed = false;
+    }
+
     public static bool operator ==(Node? a, Node? b)
     {
         return a is not null && b is not null && a.Position == b.Position;

@@ -1,4 +1,4 @@
-﻿using System.Numerics;
+﻿using Raylib_cs;
 using Simulation_CSharp.Tiles;
 
 namespace Simulation_CSharp.Entities.AI.Goals;
@@ -9,7 +9,7 @@ public class TileTypeGoal : Goal
     private int _step;
     private List<TileCell> _path = null!;
 
-    public TileTypeGoal(int priority, bool canOverrideRandom, Entity entity, Brain brain, ITileType tileType) : base(priority, canOverrideRandom, entity, brain)
+    public TileTypeGoal(int priority, bool canOverrideRandom, Entity entity, Brain brain, string statusText, ITileType tileType) : base(priority, canOverrideRandom, entity, brain, statusText)
     {
         _tileType = tileType;
     }
@@ -22,15 +22,31 @@ public class TileTypeGoal : Goal
 
     public override void PerformTask()
     {
-        // moves entity towards the next step's position
-        Entity.MoveTowardsLocation(_path[_step].TruePosition);
-        // if we are close enough to this step then we move towards the next step
-        if (!(Entity.Position.Distance(_path[_step]) < 0.5)) return;
-        _step++;
-        if (_step == _path.Count)
+        if (!_path.Any())
         {
             GoalCompleted();
+            return;
         }
+        if (_step >= _path.Count)
+        {
+            GoalCompleted();
+            return;
+        }
+
+        for (var i = 0; i < _path.Count; i++)
+        {
+            var st = _path[i];
+            Raylib.DrawCircle((int) st.TruePosition.X, (int) st.TruePosition.Y, 5, Color.BLUE);
+            Raylib.DrawText(i.ToString(), (int) st.TruePosition.X + 5, (int) st.TruePosition.Y + 5, 2, Color.WHITE);
+        }
+
+        var stepPos = _path[_step];
+        
+        // moves entity towards the next step's position
+        Entity.MoveTowardsLocation(stepPos.TruePosition);
+        // if we are close enough to this step then we move towards the next step
+        if (!(Entity.Position.Distance(stepPos) < 1.5)) return;
+        _step++;
     }
     
     public override bool ShouldResume()

@@ -34,6 +34,14 @@ public class AStarPathFinder<T> : IPathFindingAgent<T> where T : Node
         _boundY1 = Math.Min(startPos.Y, endPos.Y);
         _boundX2 = Math.Max(startPos.X, endPos.X);
         _boundY2 = Math.Max(startPos.Y, endPos.Y);
+
+        for (var i = _boundX1; i <= _boundX2; i++)
+        {
+            for (var j = _boundY1; j < _boundY2; j++)
+            {
+                grid[new TileCell(i, j)].Reset();
+            }
+        }
     }
 
     public List<TileCell> FindPath()
@@ -73,10 +81,10 @@ public class AStarPathFinder<T> : IPathFindingAgent<T> where T : Node
                 
                 path.Clear();
                 RetracePath(winningCell, path);
-
+                path.Reverse();
                 // add the end cell to path as well because retracePath does not add the base position to the array
                 path.Add(winningCell.Position);
-                
+
                 return path;
             }
 
@@ -125,14 +133,13 @@ public class AStarPathFinder<T> : IPathFindingAgent<T> where T : Node
 
     private static void RetracePath(Node baseNode, ICollection<TileCell> parents)
     {
-        if (baseNode.Parent is null)
+        var temp = baseNode;
+        parents.Add(temp.Position);
+        while (temp.Parent is not null)
         {
-            parents.Add(baseNode.Position);
-            return;
+           parents.Add(temp.Parent.Position);
+           temp = temp.Parent;
         }
-
-        parents.Add(baseNode.Parent.Position);
-        RetracePath(baseNode.Parent, parents);
     }
 
     private IEnumerable<Node> GetNeighbors(Node node)
