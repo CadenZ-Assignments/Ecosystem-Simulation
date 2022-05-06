@@ -1,7 +1,8 @@
 ﻿using System.Text.Json;
 using Raylib_cs;
+using Simulation_CSharp.Core;
 
-namespace Simulation_CSharp.Core;
+namespace Simulation_CSharp.Serialization;
 
 // TODO
 public class SaveLoad
