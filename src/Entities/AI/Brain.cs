@@ -1,5 +1,6 @@
 ﻿using Simulation_CSharp.PathFinding;
 using Simulation_CSharp.Tiles;
+using Simulation_CSharp.Utils;
 
 namespace Simulation_CSharp.Entities.AI;
 
@@ -19,7 +20,10 @@ public class Brain
 
     public virtual void Update()
     {
-        CurrentGoal ??= PickGoal();
+        if (CurrentGoal == null)
+        {
+            RefreshGoal();
+        }
         CurrentGoal?.PerformTask();
     }
     
@@ -36,15 +40,17 @@ public class Brain
     public void RefreshGoal()
     {
         CurrentGoal = PickGoal();
+        CurrentGoal?.OnPicked();
     }
     
     protected virtual Goal? PickGoal()
     {
         Goal? picked = null;
+        var rand = new Random();
         
-        foreach (var goal in Goals)
+        foreach (var goal in Goals.Where(goal => goal.CanPick()))
         {
-            if (goal.NeedToPerformTask())
+            if (goal.ShouldResume())
             {
                 goal.ResumeGoal();
             }
@@ -59,6 +65,11 @@ public class Brain
                 picked = goal;
             } else if (picked.Priority < goal.Priority)
             {
+                // have a chance (defined by genetics) to not pick the most important task at hand
+                if (Helper.Chance(Entity.Genetics.MaxRandomness))
+                {
+                    if (!goal.CanOverrideRandomness) continue;
+                }
                 picked = goal;
             }
         }

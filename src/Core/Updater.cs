@@ -11,7 +11,7 @@ public static class Updater
     {
         Input(ref camera);
         Raylib.BeginMode2D(camera);
-        Raylib.ClearBackground(Color.DARKGRAY);
+        Raylib.ClearBackground(new Color(40, 40, 40, 255));
         CameraModification(ref camera);
         RenderMap();
         RenderEntities();

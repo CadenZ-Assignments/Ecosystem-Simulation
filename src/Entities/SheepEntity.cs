@@ -9,12 +9,14 @@ namespace Simulation_CSharp.Entities;
 
 public class SheepEntity : Entity
 {
+    private static readonly Gene BaseSheepGene = new(20, 1, 100, 100, 100, 40, 1, 10);
+    
     public SheepEntity(Gene genetics) : base(genetics)
     {
         
     }
 
-    public SheepEntity() : this(new Gene())
+    public SheepEntity() : this(BaseSheepGene)
     {
         
     }
@@ -22,19 +24,9 @@ public class SheepEntity : Entity
     protected override Brain CreateBrain()
     {
         var brain = new Brain(this, new AStarPathFinder<Tile>());
-        brain.RegisterGoal(new TileTypeGoal(0, this, brain, TileTypes.WaterTile));
+        brain.RegisterGoal(new DrinkGoal(5, this, brain));
+        brain.RegisterGoal(new RandomWalkGoal(0, this, brain));
         return brain;
-    }
-
-    protected override EntityInfo CreateEntityInfo()
-    {
-        return new EntityInfo(
-            20,
-            100,
-            100, 
-            100,
-            40
-        );
     }
 
     public override void Render()

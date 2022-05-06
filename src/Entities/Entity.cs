@@ -1,7 +1,9 @@
-﻿using Simulation_CSharp.Core;
+﻿using System.Numerics;
+using Simulation_CSharp.Core;
 using Simulation_CSharp.Entities.AI;
 using Simulation_CSharp.Entities.Inheritance;
 using Simulation_CSharp.Tiles;
+using Simulation_CSharp.Utils;
 using Simulation_CSharp.World;
 
 namespace Simulation_CSharp.Entities;
@@ -9,32 +11,24 @@ namespace Simulation_CSharp.Entities;
 public abstract class Entity
 {
     protected readonly Lazy<Brain> Brain;
-    public readonly Lazy<EntityInfo> EntityInfo;
     public readonly Gene Genetics;
     public TileCell Position = null!;
 
+    public int Health;
+    public int Hunger;
+    public int Thirst;
+    public int ReproductiveUrge;
+    
     protected Entity(Gene genetics)
     {
         Genetics = genetics;
-        EntityInfo = new Lazy<EntityInfo>(CreateEntityInfo);
         Brain = new Lazy<Brain>(CreateBrain);
+        Genetics.InfluenceStats(this);
     }
     
     public abstract void Render();
 
     protected abstract Brain CreateBrain();
-
-    protected abstract EntityInfo CreateEntityInfo();
-    
-    public void Destroy()
-    {
-        SimulationCore.Level.RemoveEntity(this);
-    }
-    
-    public void RefreshGoals()
-    {
-        Brain.Value.RefreshGoal();
-    }
 
     public virtual void Update()
     {
@@ -44,7 +38,22 @@ public abstract class Entity
             Destroy();
         }
     }
-    
+
+    public virtual bool IsBelowTolerance(int value)
+    {
+        return value < 30 / Genetics.MaxConstitution;
+    }
+
+    public void Destroy()
+    {
+        SimulationCore.Level.RemoveEntity(this);
+    }
+
+    public void RefreshGoals()
+    {
+        Brain.Value.RefreshGoal();
+    }
+
     public List<TileCell> GoTo(ITileType type)
     {
         var tc = FindTile(type);
@@ -59,6 +68,14 @@ public abstract class Entity
         return new List<TileCell>();
     }
 
+    public void MoveTowardsLocation(Vector2 position)
+    {
+        Position = new TileCell(Vector2.Lerp(Position.TruePosition, position, 0.005F * Genetics.MaxSpeed));
+        if (!Helper.Chance(10)) return;
+        Thirst--;
+        Hunger--;
+    }
+
     /// <summary>
     /// Find the closest tile of type in Entity's Sensor Range
     /// </summary>
@@ -66,7 +83,7 @@ public abstract class Entity
     /// <returns>The position of the closest tile, returns null if not found.</returns>
     protected TileCell? FindTile(ITileType tileType)
     {
-        var range = EntityInfo.Value.MaxSensorRange / 2;
+        var range = Genetics.MaxSensorRange / 2;
         TileCell? bestSoFar = null;
         
         for (var x = -range; x < range; x++)
