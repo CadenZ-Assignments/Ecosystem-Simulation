@@ -4,9 +4,15 @@ namespace Simulation_CSharp.World;
 
 public interface IMap
 {
-    public void SetTileAtCell(ITileType tileType, TileCell cell);
+    public void SetTileAtCell(TileType tileType, TileCell cell);
 
     public Tile? GetTileAtCell(TileCell cell);
+
+    public void RemoveDecorationAtCell(TileCell cell);
+    
+    public void SetDecorationAtCell(TileType tileType, TileCell cell);
+    
+    public Tile? GetDecorationAtCell(TileCell cell);
 
     public bool ExistInRange(int x, int y);
 

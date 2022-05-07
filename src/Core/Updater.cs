@@ -3,11 +3,14 @@ using Raylib_cs;
 using Simulation_CSharp.Entities;
 using Simulation_CSharp.Tiles;
 using Simulation_CSharp.Utils;
+using Simulation_CSharp.World;
 
 namespace Simulation_CSharp.Core;
 
 public static class Updater
 {
+    public static ILevel Level = null!;
+    
     public static void Update(ref Camera2D camera)
     {
         Input(ref camera);
@@ -22,24 +25,24 @@ public static class Updater
 
     private static void RenderEntities()
     {
-        SimulationCore.Level.GetEntities().ForEach(entity =>
+        Level.GetEntities().ForEach(entity =>
         {
             entity.Render();
             entity.Update();
         });
-        SimulationCore.Level.CleanEntityRemovalQueue();
+        Level.CleanEntityRemovalQueue();
     }
         
     private static void RenderMap()
     {
-        SimulationCore.Level.GetMap().Render();
+        Level.GetMap().Render();
     }
 
     private static void RenderHud()
     {
         Raylib.DrawFPS(20, 20);
     }
-    
+
     private const float MinZoomValue = 0.1f;
     private static float _scrollMovement = 1;
 
@@ -77,7 +80,7 @@ public static class Updater
         // Middle click generates a new map. For debugging purposes 
         if (Raylib.IsKeyDown(KeyboardKey.KEY_F))
         {
-            SimulationCore.Level.GetMap().GenerateNew();
+            Level.GetMap().GenerateNew();
         }
 
         if (Raylib.IsKeyDown(KeyboardKey.KEY_R))
@@ -87,7 +90,7 @@ public static class Updater
             
         if (Raylib.IsMouseButtonReleased(MouseButton.MOUSE_BUTTON_RIGHT))
         {
-            SimulationCore.Level.CreateEntity(() => new SheepEntity(), new TileCell(Helper.GetWorldSpaceMousePos(ref camera)));
+            Level.CreateEntity(() => new SheepEntity(), new TileCell(Helper.GetWorldSpaceMousePos(ref camera)));
         }
 
         var value = Raylib.GetMouseWheelMove();

@@ -7,13 +7,14 @@ namespace Simulation_CSharp.Core;
 
 public static class SimulationCore
 {
-    public static ILevel Level = null!;
+    private static ILevel _level = null!;
     public static Camera2D Camera2D;
     
     public static void Main(string[] args)
     {
-        Level = new Level();
-        
+        _level = new Level();
+        Updater.Level = _level;
+
         Raylib.SetConfigFlags(ConfigFlags.FLAG_WINDOW_RESIZABLE);
         Raylib.InitWindow(800, 480, "Simulation Engine");
         

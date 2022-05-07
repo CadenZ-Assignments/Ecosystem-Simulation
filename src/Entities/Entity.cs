@@ -14,6 +14,7 @@ public abstract class Entity
     protected readonly Lazy<Brain> Brain;
     public readonly Gene Genetics;
     public TileCell Position = null!;
+    public ILevel Level = null!;
 
     public int Health;
     public int Hunger;
@@ -23,7 +24,7 @@ public abstract class Entity
     public readonly string EntityName;
     protected virtual Lazy<string> TexturePath => new(() => "entities\\" + EntityName.FileSafeFormat() + ".png");
     
-    protected bool IsSelected = false;
+    protected bool IsSelected;
     
     protected Entity(Gene genetics, string entityName)
     {
@@ -38,28 +39,39 @@ public abstract class Entity
     public virtual void Render()
     {
         var texture = ResourceLoader.GetTexture(TexturePath.Value);
-        Raylib.DrawTexture(texture, (int) Position.TruePosition.X, (int) Position.TruePosition.Y,
-            GetRenderColor(texture));
-        RenderHoverTooltip(texture);
+        var mousePos = Helper.GetWorldSpaceMousePos(ref SimulationCore.Camera2D);
+        var mouseOver = Helper.IsMouseOverArea(mousePos, Position.TruePosition, texture.width, texture.height);
+        
+        Raylib.DrawTexture(texture, (int) Position.TruePosition.X, (int) Position.TruePosition.Y, GetRenderColor(mouseOver));
+        RenderHoverTooltip(texture, mouseOver);
     }
 
     public virtual void Update()
     {
         Brain.Value.Update();
-        if (Position.X is > Level.WorldWidth or < 0 || Position.Y is > Level.WorldHeight or < 0)
+        
+        if (Position.X is > World.Level.WorldWidth or < 0 || Position.Y is > World.Level.WorldHeight or < 0)
         {
             Destroy();
+        }
+        
+        if (IsSelected)
+        {
+            if (Raylib.IsKeyPressed(KeyboardKey.KEY_DELETE))
+            {
+                Destroy();
+            }
         }
     }
 
     public virtual bool IsBelowTolerance(int value)
     {
-        return value < 30 / Genetics.MaxConstitution;
+        return value < 35 / Genetics.MaxConstitution;
     }
 
     public void Destroy()
     {
-        SimulationCore.Level.RemoveEntity(this);
+        Level.RemoveEntity(this);
     }
 
     public void RefreshGoals()
@@ -67,16 +79,33 @@ public abstract class Entity
         Brain.Value.RefreshGoal();
     }
 
-    public List<TileCell> GoTo(ITileType type)
+    public List<TileCell> FindPathTo(TileType type)
     {
         var tc = FindTile(type);
-        var map = SimulationCore.Level.GetMap();
-        return tc is not null ? Brain.Value.PathFinder.FindPath(map.GetTileAtCell(Position)!, map.GetTileAtCell(tc)!, map.GetGrid()) : new List<TileCell>();
+        var map = Level.GetMap();
+        if (tc is null) return new List<TileCell>();
+        Brain.Value.PathFinder.Init(map.GetTileAtCell(Position)!, map.GetTileAtCell(tc)!, map.GetGrid());
+        return Brain.Value.PathFinder.FindPath();
     }
 
-    public void MoveTowardsLocation(Vector2 position)
+    /// <summary>
+    /// Moves entity towards the target location give
+    /// </summary>
+    /// <param name="position"></param>
+    /// <returns>Returns false if entity can not walk on target location.</returns>
+    public bool MoveTowardsLocation(Vector2 position)
     {
-        Position = new TileCell(Vector2.Lerp(Position.TruePosition, position, 0.005F * Genetics.MaxSpeed));
+        var targetPos = new TileCell(Vector2.Lerp(Position.TruePosition, position, 0.008F * Genetics.MaxSpeed));
+        var targetTile = Level.GetMap().GetTileAtCell(targetPos);
+        
+        if (targetTile is not null && !targetTile.WalkableForEntity(this))
+        {
+            // if entity can not walk on target position we will stop moving
+            return false;
+        }
+
+        Position = targetPos;
+        
         if (Helper.Chance(2))
         { 
             Thirst--;
@@ -84,33 +113,43 @@ public abstract class Entity
         {
             Hunger--;
         }
+
+        return true;
     }
 
-    protected Color GetRenderColor(Texture2D texture2D)
+    protected Color GetRenderColor(bool mouseOver)
     {
-        var mousePos = Helper.GetWorldSpaceMousePos(ref SimulationCore.Camera2D);
-        return Helper.IsMouseOverArea(mousePos, Position.TruePosition, texture2D.width, texture2D.height) || IsSelected
-            ? Color.DARKGRAY
-            : Color.WHITE;
+        if (mouseOver && !IsSelected || IsSelected && !mouseOver)
+        {
+            return Color.DARKGRAY;
+        }
+
+        if (mouseOver && IsSelected)
+        {
+            return Color.BLACK;
+        }
+
+        return Color.WHITE;
     }
 
-    protected void RenderHoverTooltip(Texture2D texture2D)
+    protected void RenderHoverTooltip(Texture2D texture2D, bool mouseOver)
     {
-        var mousePos = Helper.GetWorldSpaceMousePos(ref SimulationCore.Camera2D);
-        // draw hover tool tip if mouse is hovering
-        if (!IsSelected && !Helper.IsMouseOverArea(mousePos, Position.TruePosition, texture2D.width, texture2D.height)) return;
+        if (mouseOver)
+        {
+            if (Raylib.IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT))
+            {
+                IsSelected = !IsSelected;
+            }
+        }
+        
+        if (!IsSelected && !mouseOver) return;
 
         var rectX = Position.TruePosition.X + 40;
         var rectY = Position.TruePosition.Y - 45;
         var rectWidth = 200;
         var rectHeight = 10;
         var contentYModifier = 5;
-
-        if (Raylib.IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT))
-        {
-            IsSelected = !IsSelected;
-        }
-
+        
         DrawText(EntityName);
         DrawText(Brain.Value.GetStatus() + "..");
 
@@ -174,7 +213,7 @@ public abstract class Entity
                 new Color(100, 100, 100, 250)
             );
             
-            Raylib.DrawText(value.ToString(), (int) barX + 8, (int) barY + 5, 3, Color.LIGHTGRAY);
+            Raylib.DrawText(value.ToString(), (int) barX + 8, (int) barY + 5, 3, Color.BLACK);
 
             rectHeight += barHeight + 5;
             contentYModifier += barHeight + 2;
@@ -186,7 +225,7 @@ public abstract class Entity
     /// </summary>
     /// <param name="tileType">The tile type looking for.</param>
     /// <returns>The position of the closest tile, returns null if not found.</returns>
-    protected TileCell? FindTile(ITileType tileType)
+    protected TileCell? FindTile(TileType tileType)
     {
         var range = Genetics.MaxSensorRange / 2;
         TileCell? bestSoFar = null;
@@ -195,8 +234,10 @@ public abstract class Entity
         {
             for (var y = -range; y < range; y++)
             {
-                if (!SimulationCore.Level.GetMap().ExistInRange(Position.X + x, Position.Y + y)) continue;
-                var tile = SimulationCore.Level.GetMap().GetTileAtCell(new TileCell(Position.X + x, Position.Y + y));
+                if (!Level.GetMap().ExistInRange(Position.X + x, Position.Y + y)) continue;
+                var pos = new TileCell(Position.X + x, Position.Y + y);
+                
+                var tile = tileType.IsDecoration ? Level.GetMap().GetDecorationAtCell(pos) : Level.GetMap().GetTileAtCell(pos);
 
                 if (tile is null || tile.Type != tileType) continue;
 

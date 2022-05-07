@@ -19,7 +19,7 @@ public class Level : ILevel
     {
         _entities = new List<Entity>();
         _removalQueue = new Queue<Entity>();
-        _map = new Map(WorldWidth, WorldHeight);
+        _map = new Map(WorldWidth, WorldHeight, this);
     }
 
     public void CreateEntity(Func<Entity> entity, TileCell position)
@@ -37,6 +37,7 @@ public class Level : ILevel
         }
             
         entityCreated.Position = position;
+        entityCreated.Level = this;
         entityCreated.RefreshGoals();
         _entities.Add(entityCreated);
         Raylib.TraceLog(TraceLogLevel.LOG_INFO, "Added Entity");

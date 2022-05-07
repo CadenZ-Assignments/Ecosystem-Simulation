@@ -5,53 +5,60 @@ namespace Simulation_CSharp.Entities.AI.Goals;
 
 public class TileTypeGoal : Goal
 {
-    private readonly ITileType _tileType;
+    private readonly TileType _tileType;
     private int _step;
-    private List<TileCell> _path = null!;
+    protected List<TileCell> Path = null!;
 
-    public TileTypeGoal(int priority, bool canOverrideRandom, Entity entity, Brain brain, string statusText, ITileType tileType) : base(priority, canOverrideRandom, entity, brain, statusText)
+    public TileTypeGoal(int priority, bool canOverrideRandom, Entity entity, Brain brain, string statusText, TileType tileType) : base(priority, canOverrideRandom, entity, brain, statusText)
     {
         _tileType = tileType;
     }
 
     public override void OnPicked()
     { 
-        _path = Entity.GoTo(_tileType);
+        Path = Entity.FindPathTo(_tileType);
         _step = 0;
     }
 
     public override void PerformTask()
     {
-        if (!_path.Any())
+        if (!Path.Any())
         {
             GoalCompleted();
             return;
         }
-        if (_step >= _path.Count)
+        if (_step >= Path.Count)
         {
             GoalCompleted();
             return;
         }
 
-        for (var i = 0; i < _path.Count; i++)
+        for (var i = 0; i < Path.Count; i++)
         {
-            var st = _path[i];
+            var st = Path[i];
             Raylib.DrawCircle((int) st.TruePosition.X, (int) st.TruePosition.Y, 5, Color.YELLOW);
             Raylib.DrawText(i.ToString(), (int) st.TruePosition.X, (int) st.TruePosition.Y, 2, Color.BLACK);
         }
 
-        var stepPos = _path[_step];
+        var stepPos = Path[_step];
         
         // moves entity towards the next step's position
-        Entity.MoveTowardsLocation(stepPos.TruePosition);
+        if (!Entity.MoveTowardsLocation(stepPos.TruePosition))
+        {
+            GoalCompleted();
+            return;
+        }
+        
         // if we are close enough to this step then we move towards the next step
-        if (!(Entity.Position.Distance(stepPos) < 0.5)) return;
-        _step++;
+        if (Entity.Position.Distance(stepPos) <= 1.5)
+        {
+            _step++;
+        }
     }
     
     public override bool ShouldResume()
     {
-        var path = Entity.GoTo(_tileType);
+        var path = Entity.FindPathTo(_tileType);
         return path.Any() && Entity.Position.Distance(path.Last()) > 1;
     }
 

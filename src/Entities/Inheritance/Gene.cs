@@ -2,6 +2,7 @@
 
 public class Gene
 {
+    
     public readonly int MaxHealth;
     public readonly int MaxSpeed;
     public readonly int MaxHunger;
@@ -10,8 +11,11 @@ public class Gene
     public readonly int MaxSensorRange;
     public readonly int MaxConstitution;
     public readonly int MaxRandomness;
-
-    public Gene(int maxHealth, int maxSpeed, int maxThirst, int maxHunger, int maxReproductiveUrge, int maxSensorRange, int maxConstitution, int maxRandomness)
+    public readonly bool WaterBorne;
+    public readonly bool LandBorne;
+    public readonly bool AirBorne;
+    
+    public Gene(int maxHealth, int maxSpeed, int maxThirst, int maxHunger, int maxReproductiveUrge, int maxSensorRange, int maxConstitution, int maxRandomness, bool waterBorne, bool landBorne, bool airBorne)
     {
         MaxHealth = maxHealth;
         MaxSpeed = maxSpeed;
@@ -21,6 +25,9 @@ public class Gene
         MaxSensorRange = maxSensorRange;
         MaxConstitution = maxConstitution;
         MaxRandomness = maxRandomness;
+        WaterBorne = waterBorne;
+        LandBorne = landBorne;
+        AirBorne = airBorne;
     }
 
     public virtual void InfluenceStats(Entity entity)
@@ -28,7 +35,7 @@ public class Gene
         entity.Health = MaxHealth;
         entity.Hunger = MaxHunger;
         entity.Thirst = MaxThirst;
-        entity.ReproductiveUrge = MaxReproductiveUrge;
+        entity.ReproductiveUrge = 0;
     }
     
     public static Gene InheritFrom(Gene parent1, Gene parent2)
@@ -41,7 +48,10 @@ public class Gene
             Average(parent1.MaxReproductiveUrge, parent2.MaxReproductiveUrge),
             Average(parent1.MaxSensorRange, parent2.MaxSensorRange),
             Average(parent1.MaxConstitution, parent2.MaxConstitution),
-            Average(parent1.MaxRandomness, parent2.MaxRandomness)
+            Average(parent1.MaxRandomness, parent2.MaxRandomness),
+            parent1.WaterBorne,
+            parent1.LandBorne,
+            parent1.AirBorne
         );
     }
 

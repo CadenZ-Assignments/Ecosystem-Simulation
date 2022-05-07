@@ -8,7 +8,7 @@ namespace Simulation_CSharp.Entities;
 
 public class SheepEntity : Entity
 {
-    private static readonly Gene BaseSheepGene = new(20, 1, 100, 100, 100, 40, 1, 10);
+    private static readonly Gene BaseSheepGene = new(20, 1, 100, 100, 100, 40, 1, 10, false, true, false);
     
     public SheepEntity(Gene genetics) : base(genetics, "Sheep")
     {
@@ -24,6 +24,7 @@ public class SheepEntity : Entity
     {
         var brain = new Brain(this, new AStarPathFinder<Tile>());
         brain.RegisterGoal(new DrinkGoal(5, this, brain));
+        brain.RegisterGoal(new EatBushGoal(5, this, brain));
         brain.RegisterGoal(new RandomWalkGoal(0, this, brain));
         return brain;
     }

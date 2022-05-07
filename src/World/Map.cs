@@ -1,42 +1,69 @@
-﻿using System.Security.Cryptography;
-using Simulation_CSharp.Tiles;
+﻿using Simulation_CSharp.Tiles;
+using Simulation_CSharp.Utils;
 
 namespace Simulation_CSharp.World;
 
 public class Map : IMap
 {
     public readonly Dictionary<TileCell, Tile> Tiles;
+    public readonly Dictionary<TileCell, Tile> Decorations;
     public readonly List<Tile> UpdatableTiles;
-    public readonly List<Tile> Decorations;
 
     public readonly int WorldWidth;
     public readonly int WorldHeight;
+    private readonly ILevel _level;
 
-    public Map(int worldWidth, int worldHeight)
+    public Map(int worldWidth, int worldHeight, ILevel level)
     {
         WorldWidth = worldWidth;
         WorldHeight = worldHeight;
 
         Tiles = new Dictionary<TileCell, Tile>();
+        _level = level;
+        Decorations = new Dictionary<TileCell, Tile>();
         UpdatableTiles = new List<Tile>();
-        Decorations = new List<Tile>();
 
         GenerateNew();
     }
 
-    public void SetTileAtCell(ITileType tileType, TileCell cell)
+    public void SetTileAtCell(TileType tileType, TileCell cell)
     {
-        if (ExistInRange(cell.X, cell.Y))
-        {
-            Tiles[cell].Type = tileType;
-        }
+        if (!ExistInRange(cell.X, cell.Y)) return;
+        var tile = tileType.CreateTile(cell);
+        tile.Level = _level;
+        Tiles[cell] = tile;
     }
     
     public Tile? GetTileAtCell(TileCell cell)
     {
         return ExistInRange(cell.X, cell.Y) ? Tiles[cell] : null;
     }
-    
+
+    public void SetDecorationAtCell(TileType tileType, TileCell cell)
+    {
+        if (!ExistInRange(cell.X, cell.Y)) return;
+        if (Decorations.ContainsKey(cell))
+        {
+            var tile = tileType.CreateTile(cell);
+            tile.Level = _level;
+            Decorations[cell] = tile;
+        }
+    }
+
+    public void RemoveDecorationAtCell(TileCell cell)
+    {
+        if (!ExistInRange(cell.X, cell.Y)) return;
+        if (Decorations.ContainsKey(cell))
+        {
+            Decorations.Remove(cell);
+        }
+    }
+
+    public Tile? GetDecorationAtCell(TileCell cell)
+    {
+        return ExistInRange(cell.X, cell.Y) && Decorations.ContainsKey(cell) ? Decorations[cell] : null;
+    }
+
     public bool ExistInRange(int x, int y)
     {
         return x > 0 && y > 0 && x < WorldWidth && y < WorldHeight;
@@ -49,6 +76,11 @@ public class Map : IMap
             tile.Render();
         }
 
+        foreach (var decoration in Decorations.Values)
+        {
+            decoration.Render();
+        }
+        
         foreach (var updatableTile in UpdatableTiles)
         {
             updatableTile.Update();
@@ -58,8 +90,11 @@ public class Map : IMap
     public void GenerateNew()
     {
         Tiles.Clear();
+        Decorations.Clear();
+        UpdatableTiles.Clear();
 
-        var noiseGenerator = new FastNoiseLite(RandomNumberGenerator.GetInt32(int.MinValue, int.MaxValue));
+        // base layer
+        var noiseGenerator = new FastNoiseLite(new Random().Next());
         noiseGenerator.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
 
         for (var x = 0; x < WorldWidth; x++)
@@ -75,6 +110,10 @@ public class Map : IMap
                         break;
                     case >= 0:
                         AddTile(tileCell, TileTypes.GrassTile);
+                        if (Helper.Chance(1))
+                        {
+                            AddDecoration(tileCell, Helper.Chance(70) ? TileTypes.GrownBushTile : TileTypes.GrowingBushTile, false);
+                        }
                         break;
                 }
             }
@@ -86,11 +125,28 @@ public class Map : IMap
         return Tiles;
     }
 
-    private void AddTile(TileCell cell, ITileType tileType)
+    private void AddTile(TileCell cell, TileType tileType)
     {
         var tile = tileType.CreateTile(cell);
+        tile.Level = _level;
         Tiles.Add(cell, tile);
-        if (tileType is IUpdatableTileType)
+        if (tile.Updatable())
+        {
+            UpdatableTiles.Add(tile);
+        }
+    }
+
+    private void AddDecoration(TileCell cell, TileType type, bool blocking)
+    {
+        var tile = type.CreateTile(cell);
+        tile.Level = _level;
+        Decorations.Add(cell, tile);
+        if (blocking)
+        {
+            Tiles[cell].IsObstructed = true;
+        }
+
+        if (tile.Updatable())
         {
             UpdatableTiles.Add(tile);
         }

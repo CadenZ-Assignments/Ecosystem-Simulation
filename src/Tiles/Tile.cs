@@ -1,4 +1,6 @@
-﻿using Simulation_CSharp.PathFinding;
+﻿using Simulation_CSharp.Entities;
+using Simulation_CSharp.PathFinding;
+using Simulation_CSharp.World;
 
 namespace Simulation_CSharp.Tiles;
 
@@ -7,11 +9,21 @@ namespace Simulation_CSharp.Tiles;
 /// </summary>
 public class Tile : Node
 {
-    public ITileType Type;
+    public TileType Type;
+    public ILevel Level = null!;
 
-    public Tile(ITileType type, TileCell position) : base(position)
+    public Tile(TileType type, TileCell position) : base(position)
     {
         Type = type;
+    }
+
+    public virtual bool Updatable()
+    {
+        return false;
+    }
+    
+    public virtual void Update()
+    {
     }
 
     public void Render()
@@ -19,11 +31,8 @@ public class Tile : Node
         Type.Render(Position);
     }
 
-    public void Update()
+    public bool WalkableForEntity(Entity entity)
     {
-        if (Type is IUpdatableTileType type)
-        {
-            type.Update();
-        }
+        return (!IsObstructed && Type.WalkableForEntity(entity)) || entity.Genetics.AirBorne;
     }
 }

@@ -7,6 +7,10 @@ public class AStarPathFinder<T> : IPathFindingAgent<T> where T : Node
     private const bool IgnoreGCost = false;
     
     private Dictionary<TileCell, T>? _grid;
+    private Dictionary<Node, Node?>? _parents;
+    private Dictionary<Node, float>? _gCosts;
+    private Dictionary<Node, float>? _hCosts;
+    private Dictionary<Node, float>? _fCosts;
     private List<Node>? _openSet;
     private List<Node>? _closedSet;
     private Node? _start;
@@ -19,6 +23,10 @@ public class AStarPathFinder<T> : IPathFindingAgent<T> where T : Node
     public void Init(Node start, Node end, Dictionary<TileCell, T> grid)
     {
         _grid = grid;
+        _parents = new Dictionary<Node, Node?>();
+        _gCosts = new Dictionary<Node, float>();
+        _hCosts = new Dictionary<Node, float>();
+        _fCosts = new Dictionary<Node, float>();
         _start = start;
         _end = end;
         _openSet = new List<Node>();
@@ -35,18 +43,21 @@ public class AStarPathFinder<T> : IPathFindingAgent<T> where T : Node
         _boundX2 = Math.Max(startPos.X, endPos.X);
         _boundY2 = Math.Max(startPos.Y, endPos.Y);
 
-        for (var i = _boundX1; i <= _boundX2; i++)
+        for (var i = _boundX1 - 1; i <= _boundX2 + 1; i++)
         {
-            for (var j = _boundY1; j < _boundY2; j++)
+            for (var j = _boundY1 - 1; j < _boundY2 + 1; j++)
             {
-                grid[new TileCell(i, j)].Reset();
+                _parents.Add(grid[new TileCell(i, j)], null);
+                _gCosts.Add(grid[new TileCell(i, j)], 0);
+                _hCosts.Add(grid[new TileCell(i, j)], 0);
+                _fCosts.Add(grid[new TileCell(i, j)], 0);
             }
         }
     }
 
     public List<TileCell> FindPath()
     {
-        if (_grid is null || _openSet is null || _closedSet is null || _start is null || _end is null)
+        if (_grid is null || _fCosts is null || _gCosts is null || _hCosts is null || _parents is null || _openSet is null || _closedSet is null || _start is null || _end is null)
         {
             throw new Exception("Tried to path find without initializing required variables");
         }
@@ -61,7 +72,7 @@ public class AStarPathFinder<T> : IPathFindingAgent<T> where T : Node
 
             for (var i = 0; i < _openSet.Count; i++)
             {
-                if (_openSet[i].FCost < _openSet[winningIndex].FCost)
+                if (_fCosts[_openSet[i]] < _fCosts[_openSet[winningIndex]])
                 {
                     winningIndex = i;
                 }
@@ -100,51 +111,52 @@ public class AStarPathFinder<T> : IPathFindingAgent<T> where T : Node
             
             foreach (var neighbor in neighbors.Where(neighbor => !neighbor.IsObstructed).Where(neighbor => !_closedSet.Contains(neighbor)))
             {
-                var tempG = winningCell.GCost + neighbor.Position.Distance(winningCell.Position);
+                var tempG = _gCosts[winningCell] + neighbor.Position.Distance(winningCell.Position);
                 var newG = false;
                 
                 // if _openSet contains
                 if (_openSet.Contains(neighbor))
                 {
-                    if (tempG < neighbor.GCost)
+                    if (tempG < _gCosts[neighbor])
                     {
-                        neighbor.GCost = tempG;
+                        _gCosts[neighbor] = tempG;
                         newG = true;
                     }
                 }
                 else
                 {
-                    neighbor.GCost = tempG;
+                    _gCosts[neighbor] = tempG;
                     newG = true;
                     _openSet.Add(neighbor);
                 }
 
                 if (!newG) continue;
-                neighbor.HCost = neighbor.Position.Distance(_end.Position);
-                neighbor.FCost = IgnoreGCost ? neighbor.HCost : neighbor.GCost + neighbor.HCost;
-                neighbor.Parent = winningCell;
+                _hCosts[neighbor] = neighbor.Position.Distance(_end.Position);
+                _fCosts[neighbor] = IgnoreGCost ? _hCosts[neighbor] : _gCosts[neighbor] + _hCosts[neighbor];
+                _parents[neighbor] = winningCell;
             }
         }
 
         return new List<TileCell>();
     }
 
-    public List<TileCell> FindPath(Node start, Node end, Dictionary<TileCell, T> map)
+    private void RetracePath(Node baseNode, ICollection<TileCell> parents)
     {
-        Init(start, end, map);
-        return FindPath();
-    }
+        if (_parents is null)
+        {
+            throw new Exception("Tried to path find without initializing required variables");
+        }
 
-    private static void RetracePath(Node baseNode, ICollection<TileCell> parents)
-    {
-        if (baseNode.Parent is null)
+        var parent = _parents[baseNode];
+        
+        if (parent is null)
         {
             parents.Add(baseNode.Position);
             return;
         }
         
-        parents.Add(baseNode.Parent.Position);
-        RetracePath(baseNode.Parent, parents);
+        parents.Add(parent.Position);
+        RetracePath(parent, parents);
     }
 
     private IEnumerable<Node> GetNeighbors(Node node)

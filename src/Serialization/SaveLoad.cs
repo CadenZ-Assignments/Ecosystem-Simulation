@@ -1,6 +1,4 @@
-﻿using System.Text.Json;
-using Raylib_cs;
-using Simulation_CSharp.Core;
+﻿using Raylib_cs;
 
 namespace Simulation_CSharp.Serialization;
 
@@ -20,6 +18,5 @@ public class SaveLoad
         Raylib.TraceLog(TraceLogLevel.LOG_INFO, "Saving to save file");
         if (!File.Exists(Path)) Directory.CreateDirectory(Path);
         using var fileStream = new FileStream(FilePath, FileMode.Create);
-        JsonSerializer.Serialize(fileStream, SimulationCore.Level);
     }
 }

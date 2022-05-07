@@ -4,11 +4,8 @@ namespace Simulation_CSharp.Tiles;
 
 public class TileCell
 {
-    public const float CellSideLength = 20;
-    
+    public const float CellSideLength = 16;
     public static readonly Vector2 CellSizeVec = new(CellSideLength, CellSideLength);
-    private static readonly float SidePow = (float) Math.Pow(CellSideLength, 2);
-    public static readonly float DiagonalDistancePerCell = (float) Math.Sqrt(SidePow + SidePow);
 
     private const float StartingX = 20;
     private const float StartingY = 20;

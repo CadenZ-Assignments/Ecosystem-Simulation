@@ -7,6 +7,7 @@ namespace Simulation_CSharp.Entities.AI.Goals;
 public class RandomWalkGoal : Goal
 {
     private int _direction;
+    private int _walkTime;
     private Vector2 _targetPos;
 
     public RandomWalkGoal(int priority, Entity entity, Brain brain) : base(priority, false, entity, brain, "Wondering")
@@ -16,6 +17,8 @@ public class RandomWalkGoal : Goal
     public override void OnPicked()
     {
         _direction = RandomNumberGenerator.GetInt32(1, 9);
+        _walkTime = RandomNumberGenerator.GetInt32(50, 400);
+        
         Vector2 dir;
 
         switch (_direction)
@@ -51,11 +54,10 @@ public class RandomWalkGoal : Goal
 
     public override void PerformTask()
     {
-        // moves entity towards the next step's position
-        Entity.MoveTowardsLocation(_targetPos);
+        _walkTime--;
         
-        // if we are close enough to this step then we move towards the next step
-        if (Entity.Position.Distance(new TileCell(_targetPos)) < 2)
+        // moves entity towards the next step's position
+        if (!Entity.MoveTowardsLocation(_targetPos) || _walkTime <= 0)
         {
             GoalCompleted();
         }

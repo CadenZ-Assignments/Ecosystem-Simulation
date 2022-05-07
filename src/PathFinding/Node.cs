@@ -5,28 +5,11 @@ namespace Simulation_CSharp.PathFinding;
 public class Node
 {
     public readonly TileCell Position;
-    public float GCost; // distance from starting node
-    public float HCost; // distance from ending node
-    public float FCost; // G + H = F
-    public Node? Parent;
     public bool IsObstructed;
     
     public Node(TileCell position)
     {
         Position = position;
-        GCost = 0;
-        HCost = 0;
-        FCost = 0;
-        Parent = null;
-        IsObstructed = false;
-    }
-
-    public void Reset()
-    {
-        GCost = 0;
-        HCost = 0;
-        FCost = 0;
-        Parent = null;
         IsObstructed = false;
     }
 
