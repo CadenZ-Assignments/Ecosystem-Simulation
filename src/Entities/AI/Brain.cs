@@ -1,4 +1,5 @@
 ﻿using Raylib_cs;
+using Simulation_CSharp.Core;
 using Simulation_CSharp.PathFinding;
 using Simulation_CSharp.Tiles;
 using Simulation_CSharp.Utils;
@@ -23,7 +24,10 @@ public class Brain
     {
         if (CurrentGoal == null)
         {
-            RefreshGoal();
+            if (Helper.Chance(1*SimulationCore.Time))
+            {
+                RefreshGoal();
+            }
         }
         CurrentGoal?.PerformTask();
     }
@@ -53,7 +57,7 @@ public class Brain
     {
         Goal? picked = null;
         
-        foreach (var goal in Goals.Where(goal => goal.CanPick()))
+        foreach (var goal in Goals)
         {
             if (goal.ShouldResume())
             {
@@ -64,21 +68,28 @@ public class Brain
             {
                 continue;
             }
+
+            if (!goal.CanPick())
+            {
+                continue;
+            }
+            
+            // have a chance (defined by genetics) to not pick the most important task at hand
+            if (Helper.Chance(Entity.Genetics.MaxRandomness))
+            {
+                if (!goal.CanOverrideRandomness)
+                {
+                    Raylib.TraceLog(TraceLogLevel.LOG_INFO, "Randomly skipped goal of " + goal.StatusText);
+                    continue;
+                }
+            }
             
             if (picked == null)
             {
                 picked = goal;
-            } else if (picked.Priority < goal.Priority)
+            }
+            else if (picked.Priority < goal.Priority) 
             {
-                // have a chance (defined by genetics) to not pick the most important task at hand
-                if (Helper.Chance(Entity.Genetics.MaxRandomness))
-                {
-                    if (!goal.CanOverrideRandomness)
-                    {
-                        Raylib.TraceLog(TraceLogLevel.LOG_INFO, "Randomly skipped goal of " + goal.StatusText);
-                        continue;
-                    }
-                }
                 picked = goal;
             }
         }

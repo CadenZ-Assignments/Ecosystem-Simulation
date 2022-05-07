@@ -4,7 +4,7 @@ namespace Simulation_CSharp.Tiles;
 
 public class TileCell
 {
-    public const float CellSideLength = 16;
+    public const float CellSideLength = 32;
     public static readonly Vector2 CellSizeVec = new(CellSideLength, CellSideLength);
 
     private const float StartingX = 20;

@@ -1,36 +1,44 @@
-﻿using Simulation_CSharp.Tiles;
+﻿using Simulation_CSharp.Entities;
+using Simulation_CSharp.Tiles;
 
 namespace Simulation_CSharp.PathFinding;
 
-public class AStarPathFinder<T> : IPathFindingAgent<T> where T : Node
+public class AStarPathFinder : IPathFindingAgent<Tile>
 {
     private const bool IgnoreGCost = false;
     
-    private Dictionary<TileCell, T>? _grid;
-    private Dictionary<Node, Node?>? _parents;
-    private Dictionary<Node, float>? _gCosts;
-    private Dictionary<Node, float>? _hCosts;
-    private Dictionary<Node, float>? _fCosts;
-    private List<Node>? _openSet;
-    private List<Node>? _closedSet;
-    private Node? _start;
-    private Node? _end;
+    private Dictionary<TileCell, Tile>? _grid;
+    private Dictionary<Tile, Tile?>? _parents;
+    private Dictionary<Tile, float>? _gCosts;
+    private Dictionary<Tile, float>? _hCosts;
+    private Dictionary<Tile, float>? _fCosts;
+    private List<Tile>? _openSet;
+    private List<Tile>? _closedSet;
+    private Tile? _start;
+    private Tile? _end;
     private int _boundX1;
     private int _boundY1;
     private int _boundX2;
     private int _boundY2;
 
-    public void Init(Node start, Node end, Dictionary<TileCell, T> grid)
+    private readonly Entity _entity;
+    
+    public AStarPathFinder(Entity entity)
+    {
+        _entity = entity;
+    }
+
+    public void Init(Tile start, Tile end, Dictionary<TileCell, Tile> grid)
     {
         _grid = grid;
-        _parents = new Dictionary<Node, Node?>();
-        _gCosts = new Dictionary<Node, float>();
-        _hCosts = new Dictionary<Node, float>();
-        _fCosts = new Dictionary<Node, float>();
+        _parents = new Dictionary<Tile, Tile?>();
+        _gCosts = new Dictionary<Tile, float>();
+        _hCosts = new Dictionary<Tile, float>();
+        _fCosts = new Dictionary<Tile, float>();
         _start = start;
         _end = end;
-        _openSet = new List<Node>();
-        _closedSet = new List<Node>();
+        _openSet = new List<Tile>();
+        _closedSet = new List<Tile>();
         _openSet.Add(_start);
 
         var startPos = _start.Position;
@@ -54,7 +62,7 @@ public class AStarPathFinder<T> : IPathFindingAgent<T> where T : Node
             }
         }
     }
-
+    
     public List<TileCell> FindPath()
     {
         if (_grid is null || _fCosts is null || _gCosts is null || _hCosts is null || _parents is null || _openSet is null || _closedSet is null || _start is null || _end is null)
@@ -109,7 +117,7 @@ public class AStarPathFinder<T> : IPathFindingAgent<T> where T : Node
 
             var neighbors = GetNeighbors(winningCell);
             
-            foreach (var neighbor in neighbors.Where(neighbor => !neighbor.IsObstructed).Where(neighbor => !_closedSet.Contains(neighbor)))
+            foreach (var neighbor in neighbors.Where(neighbor => neighbor.WalkableForEntity(_entity) || neighbor == _end).Where(neighbor => !_closedSet.Contains(neighbor)))
             {
                 var tempG = _gCosts[winningCell] + neighbor.Position.Distance(winningCell.Position);
                 var newG = false;
@@ -140,18 +148,18 @@ public class AStarPathFinder<T> : IPathFindingAgent<T> where T : Node
         return new List<TileCell>();
     }
 
-    private void RetracePath(Node baseNode, ICollection<TileCell> parents)
+    private void RetracePath(Tile baseTile, ICollection<TileCell> parents)
     {
         if (_parents is null)
         {
             throw new Exception("Tried to path find without initializing required variables");
         }
 
-        var parent = _parents[baseNode];
+        var parent = _parents[baseTile];
         
         if (parent is null)
         {
-            parents.Add(baseNode.Position);
+            parents.Add(baseTile.Position);
             return;
         }
         
@@ -159,14 +167,14 @@ public class AStarPathFinder<T> : IPathFindingAgent<T> where T : Node
         RetracePath(parent, parents);
     }
 
-    private IEnumerable<Node> GetNeighbors(Node node)
+    private IEnumerable<Tile> GetNeighbors(Tile node)
     {
         if (_grid is null)
         {
             throw new Exception("Tried to initialize grid without initializing path finder");
         }
 
-        var neighbors = new List<Node>();
+        var neighbors = new List<Tile>();
 
         for (var i = -1; i <= 1; i++) {
             for (var j = -1; j <= 1; j++) {

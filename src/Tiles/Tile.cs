@@ -26,7 +26,7 @@ public class Tile : Node
     {
     }
 
-    public void Render()
+    public virtual void Render()
     {
         Type.Render(Position);
     }

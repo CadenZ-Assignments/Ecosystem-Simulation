@@ -10,13 +10,15 @@ public interface IMap
 
     public void RemoveDecorationAtCell(TileCell cell);
     
-    public void SetDecorationAtCell(TileType tileType, TileCell cell);
+    public void SetDecorationAtCell(TileType tileType, TileCell cell, bool blocking);
     
     public Tile? GetDecorationAtCell(TileCell cell);
 
     public bool ExistInRange(int x, int y);
 
     public void Render();
+    
+    public void Update();
 
     public void GenerateNew();
 

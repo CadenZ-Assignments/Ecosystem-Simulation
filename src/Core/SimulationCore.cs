@@ -9,6 +9,7 @@ public static class SimulationCore
 {
     private static ILevel _level = null!;
     public static Camera2D Camera2D;
+    public static int Time = 1;
     
     public static void Main(string[] args)
     {

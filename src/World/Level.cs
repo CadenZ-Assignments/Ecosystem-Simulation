@@ -38,7 +38,6 @@ public class Level : ILevel
             
         entityCreated.Position = position;
         entityCreated.Level = this;
-        entityCreated.RefreshGoals();
         _entities.Add(entityCreated);
         Raylib.TraceLog(TraceLogLevel.LOG_INFO, "Added Entity");
         EventHook.OnPostEntityCreate(eventInfo);
@@ -52,6 +51,18 @@ public class Level : ILevel
     public List<Entity> GetEntities()
     {
         return _entities;
+    }
+
+    public Entity? GetEntityByUuid(Guid guid)
+    {
+        try
+        {
+            return _entities.Where((entity, _) => entity.Uuid.Equals(guid)).First();
+        }
+        catch (InvalidOperationException)
+        {
+            return null;
+        }
     }
 
     public void CleanEntityRemovalQueue()

@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using System.Security.Cryptography;
+using Simulation_CSharp.Core;
 using Simulation_CSharp.Tiles;
 
 namespace Simulation_CSharp.Entities.AI.Goals;
@@ -54,7 +55,7 @@ public class RandomWalkGoal : Goal
 
     public override void PerformTask()
     {
-        _walkTime--;
+        _walkTime -= 1*SimulationCore.Time;
         
         // moves entity towards the next step's position
         if (!Entity.MoveTowardsLocation(_targetPos) || _walkTime <= 0)

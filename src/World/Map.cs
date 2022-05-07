@@ -29,9 +29,8 @@ public class Map : IMap
     public void SetTileAtCell(TileType tileType, TileCell cell)
     {
         if (!ExistInRange(cell.X, cell.Y)) return;
-        var tile = tileType.CreateTile(cell);
-        tile.Level = _level;
-        Tiles[cell] = tile;
+        Tiles.Remove(cell);
+        AddTile(cell, tileType);
     }
     
     public Tile? GetTileAtCell(TileCell cell)
@@ -39,15 +38,11 @@ public class Map : IMap
         return ExistInRange(cell.X, cell.Y) ? Tiles[cell] : null;
     }
 
-    public void SetDecorationAtCell(TileType tileType, TileCell cell)
+    public void SetDecorationAtCell(TileType tileType, TileCell cell, bool blocking)
     {
         if (!ExistInRange(cell.X, cell.Y)) return;
-        if (Decorations.ContainsKey(cell))
-        {
-            var tile = tileType.CreateTile(cell);
-            tile.Level = _level;
-            Decorations[cell] = tile;
-        }
+        Decorations.Remove(cell);
+        AddDecoration(cell, tileType, blocking);
     }
 
     public void RemoveDecorationAtCell(TileCell cell)
@@ -80,7 +75,10 @@ public class Map : IMap
         {
             decoration.Render();
         }
-        
+    }
+
+    public void Update()
+    {
         foreach (var updatableTile in UpdatableTiles)
         {
             updatableTile.Update();

@@ -12,7 +12,7 @@ public class TileType
 {
     public readonly bool IsDecoration;
     private readonly string _tileName;
-    protected virtual Lazy<string> TexturePath => new(() => "tiles\\" + _tileName.FileSafeFormat() + ".png");
+    public virtual Lazy<string> TexturePath => new(() => "tiles\\" + _tileName.FileSafeFormat() + ".png");
 
     public TileType(string tileName, bool isDecoration)
     {

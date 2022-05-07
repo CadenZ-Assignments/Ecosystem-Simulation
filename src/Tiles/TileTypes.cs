@@ -1,6 +1,9 @@
-﻿using Raylib_cs;
+﻿using System.Numerics;
+using Raylib_cs;
+using Simulation_CSharp.Core;
 using Simulation_CSharp.Entities;
 using Simulation_CSharp.Utils;
+using Simulation_CSharp.Utils.Widgets;
 
 namespace Simulation_CSharp.Tiles;
 
@@ -25,10 +28,26 @@ public class GrowingBushTileType : TileType
 
     public class GrowingBushTile : Tile
     {
-        private int _countDown = 2000;
+        private int _countDown = 0;
         
         public GrowingBushTile(TileCell position) : base(TileTypes.GrowingBushTile, position)
         {
+        }
+
+        public override void Render()
+        {
+            base.Render();
+            
+            var texture = ResourceLoader.GetTexture(Type.TexturePath.Value);
+            var mouseOver = Helper.IsMousePosOverArea(Position.TruePosition, texture.width, texture.height);
+
+            if (!mouseOver) return;
+            
+            var tooltipRenderer = new TooltipRenderer(Position.TruePosition.X + 20, Position.TruePosition.Y - 10, 10, 10);
+            tooltipRenderer.DrawText("Growing Bush");
+            tooltipRenderer.DrawSpace(15);
+            tooltipRenderer.DrawProgressBar("Growth progress", 2000, _countDown, true);
+            tooltipRenderer.DrawBackground();
         }
 
         public override bool Updatable()
@@ -38,11 +57,11 @@ public class GrowingBushTileType : TileType
 
         public override void Update()
         {
-            _countDown--;
-            if (_countDown <= 0)
+            _countDown+=1*SimulationCore.Time;
+            if (_countDown >= 2000)
             {
-                Level.GetMap().SetDecorationAtCell(TileTypes.GrownBushTile, Position);
-                _countDown = 2000;
+                Level.GetMap().SetDecorationAtCell(TileTypes.GrownBushTile, Position, false);
+                _countDown = 0;
             }
         }
     }

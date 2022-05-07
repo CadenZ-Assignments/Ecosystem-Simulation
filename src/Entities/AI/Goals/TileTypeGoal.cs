@@ -8,14 +8,17 @@ public class TileTypeGoal : Goal
     private readonly TileType _tileType;
     private int _step;
     protected List<TileCell> Path = null!;
-
+    protected TileCell? TargetCell;
+    
     public TileTypeGoal(int priority, bool canOverrideRandom, Entity entity, Brain brain, string statusText, TileType tileType) : base(priority, canOverrideRandom, entity, brain, statusText)
     {
         _tileType = tileType;
     }
-
+    
     public override void OnPicked()
     { 
+        // since tiles are static, we only need to evaluate the path once
+        TargetCell = Entity.FindTile(_tileType);
         Path = Entity.FindPathTo(_tileType);
         _step = 0;
     }
@@ -33,11 +36,21 @@ public class TileTypeGoal : Goal
             return;
         }
 
-        for (var i = 0; i < Path.Count; i++)
+        if (Entity.IsSelected)
         {
-            var st = Path[i];
-            Raylib.DrawCircle((int) st.TruePosition.X, (int) st.TruePosition.Y, 5, Color.YELLOW);
-            Raylib.DrawText(i.ToString(), (int) st.TruePosition.X, (int) st.TruePosition.Y, 2, Color.BLACK);
+            for (var i = 0; i < Path.Count; i++)
+            {
+                var st = Path[i];
+
+                try
+                {
+                    var st2 = Path[i + 1];
+                    Raylib.DrawLine((int) st.TruePosition.X, (int) st.TruePosition.Y, (int) st2.TruePosition.X, (int) st2.TruePosition.Y, Color.WHITE);
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                }
+            }
         }
 
         var stepPos = Path[_step];

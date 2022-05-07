@@ -1,11 +1,12 @@
 ﻿using Raylib_cs;
+using Simulation_CSharp.Core;
 
-namespace Simulation_CSharp.Utils;
+namespace Simulation_CSharp.Utils.Widgets;
 
 public class TooltipRenderer
 {
-    private float _rectX;
-    private float _rectY;
+    private readonly float _rectX;
+    private readonly float _rectY;
     private float _rectWidth;
     private float _rectHeight;
     private float _contentYModifier;
@@ -19,6 +20,12 @@ public class TooltipRenderer
         _contentYModifier = 5;
     }
 
+    public void DrawSpace(float amount)
+    {
+        _contentYModifier += amount;
+        _rectHeight += amount;
+    }
+    
     public void DrawBackground()
     {
         Raylib.DrawRectangleRounded(
@@ -30,21 +37,28 @@ public class TooltipRenderer
             ),
             0.05f,
             20,
-            new Color(20, 20, 20, 20)
+            SimulationColors.WidgetBackgroundColor
         );
     }
 
     public void DrawText(string text)
     {
         Raylib.DrawText(text, (int) _rectX + 5, (int) _rectY + (int) _contentYModifier, 5, Color.WHITE);
+
+        if (_rectWidth < text.Length + 10)
+        {
+            _rectWidth = text.Length*10 + 10;
+        }
+        
         _rectHeight += 10;
         _contentYModifier += 10;
     }
 
-    public void DrawProgressBar(string label, float max, float value)
+    public void DrawProgressBar(string label, float max, float value, bool percentage = false)
     {
         DrawText(label);
-            
+        DrawSpace(1);
+
         var barWidth = _rectWidth - 10;
         const int barHeight = 20;
         var barX = _rectX + 5;
@@ -59,9 +73,9 @@ public class TooltipRenderer
             ),
             0.5f,
             4,
-            new Color(200, 200, 200, 200)
+            SimulationColors.ProgressbarBackgroundColor
         );
-            
+
         Raylib.DrawRectangleRounded(
             new Rectangle(
                 barX + 2,
@@ -71,12 +85,19 @@ public class TooltipRenderer
             ),
             0.5f,
             4,
-            new Color(100, 100, 100, 250)
+            SimulationColors.ProgressbarForegroundColor
         );
-            
-        Raylib.DrawText(value.ToString(), (int) barX + 8, (int) barY + 5, 3, Color.BLACK);
 
-        _rectHeight += barHeight + 5;
+        if (percentage)
+        {
+            Raylib.DrawText(Math.Round(value / max * 100, 0) + "%", (int) barX + 8, (int) barY + 5, 3, Color.BLACK);
+        }
+        else
+        {;
+            Raylib.DrawText(value.ToString(), (int) barX + 8, (int) barY + 5, 3, Color.BLACK);
+        }
+
+        _rectHeight += barHeight + 2;
         _contentYModifier += barHeight + 2;
     }
 }

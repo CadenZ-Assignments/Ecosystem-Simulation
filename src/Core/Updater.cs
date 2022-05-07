@@ -3,6 +3,7 @@ using Raylib_cs;
 using Simulation_CSharp.Entities;
 using Simulation_CSharp.Tiles;
 using Simulation_CSharp.Utils;
+using Simulation_CSharp.Utils.Widgets;
 using Simulation_CSharp.World;
 
 namespace Simulation_CSharp.Core;
@@ -10,7 +11,7 @@ namespace Simulation_CSharp.Core;
 public static class Updater
 {
     public static ILevel Level = null!;
-    
+
     public static void Update(ref Camera2D camera)
     {
         Input(ref camera);
@@ -28,19 +29,44 @@ public static class Updater
         Level.GetEntities().ForEach(entity =>
         {
             entity.Render();
-            entity.Update();
+            if (SimulationCore.Time != 0)
+            {
+                entity.Update();
+            }
         });
-        Level.CleanEntityRemovalQueue();
+        if (SimulationCore.Time != 0)
+        {
+            Level.CleanEntityRemovalQueue();
+        }
     }
-        
+
     private static void RenderMap()
     {
         Level.GetMap().Render();
+        if (SimulationCore.Time != 0)
+        {
+            Level.GetMap().Update();
+        }
     }
+
+    private static readonly ButtonManager ButtonManager = new("Spawn Sheep", "Spawn Bush");
 
     private static void RenderHud()
     {
         Raylib.DrawFPS(20, 20);
+        ButtonManager.Render();
+    }
+
+    private static void RenderDebugGrid()
+    {
+        for (int i = 0; i < World.Level.WorldWidth; i++)
+        {
+            for (int j = 0; j < World.Level.WorldHeight; j++)
+            {
+                var pos = new TileCell(i, j);
+                Raylib.DrawRectangleLines((int) pos.TruePosition.X, (int) pos.TruePosition.Y, (int) TileCell.CellSideLength, (int) TileCell.CellSideLength, Color.BLACK);
+            }
+        }
     }
 
     private const float MinZoomValue = 0.1f;
@@ -48,7 +74,7 @@ public static class Updater
 
     private static Vector2 _initialMousePos;
     private static Vector2 _secondMousePos;
-        
+
     private static void CameraModification(ref Camera2D camera)
     {
         if (Raylib.IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT))
@@ -63,18 +89,19 @@ public static class Updater
             {
                 camera.target += -(tempSecondPos - _initialMousePos);
             }
+
             _secondMousePos = tempSecondPos;
         }
-            
+
         if (Raylib.IsMouseButtonReleased(MouseButton.MOUSE_BUTTON_LEFT))
         {
             _initialMousePos = Vector2.Zero;
         }
-            
+
         // Zooming the camera
         camera.zoom = Math.Clamp(_scrollMovement, MinZoomValue, float.MaxValue);
     }
-        
+
     private static void Input(ref Camera2D camera)
     {
         // Middle click generates a new map. For debugging purposes 
@@ -87,10 +114,22 @@ public static class Updater
         {
             camera.target = Vector2.Zero;
         }
-            
-        if (Raylib.IsMouseButtonReleased(MouseButton.MOUSE_BUTTON_RIGHT))
+
+        if (Raylib.IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT) && !ButtonManager.IsMouseOver(ref camera))
         {
-            Level.CreateEntity(() => new SheepEntity(), new TileCell(Helper.GetWorldSpaceMousePos(ref camera)));
+            var mp = new TileCell(Helper.GetWorldSpaceMousePos(ref camera));
+            if (Level.GetMap().ExistInRange(mp.X, mp.Y))
+            {
+                switch (ButtonManager.Selected)
+                {
+                    case 0:
+                        SpawnAtMouse(ref camera, () => new SheepEntity());
+                        break;
+                    case 1:
+                        PlaceAtMouse(ref camera, TileTypes.GrownBushTile, false);
+                        break;
+                }
+            }
         }
 
         var value = Raylib.GetMouseWheelMove();
@@ -99,13 +138,30 @@ public static class Updater
             case 0:
                 return;
             case < 0 when _scrollMovement >= MinZoomValue:
-                _scrollMovement += value/2;
+                _scrollMovement += value / 2;
                 break;
             case < 0:
                 return;
             default:
-                _scrollMovement += value/2;
+                _scrollMovement += value / 2;
                 break;
+        }
+    }
+    
+    private static void SpawnAtMouse(ref Camera2D camera, Func<Entity> entity)
+    {
+        Level.CreateEntity(entity, new TileCell(Helper.GetWorldSpaceMousePos(ref camera)));
+    }
+        
+    private static void PlaceAtMouse(ref Camera2D camera, TileType type, bool blocking)
+    {
+        if (type.IsDecoration)
+        {
+            Level.GetMap().SetDecorationAtCell(type, new TileCell(Helper.GetWorldSpaceMousePos(ref camera)), blocking);
+        }
+        else
+        {
+            Level.GetMap().SetTileAtCell(type, new TileCell(Helper.GetWorldSpaceMousePos(ref camera)));
         }
     }
 }
