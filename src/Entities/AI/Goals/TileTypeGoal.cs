@@ -10,7 +10,7 @@ public class TileTypeGoal : Goal
     protected List<TileCell> Path = null!;
     protected TileCell? TargetCell;
     
-    public TileTypeGoal(int priority, bool canOverrideRandom, Entity entity, Brain brain, string statusText, TileType tileType) : base(priority, canOverrideRandom, entity, brain, statusText)
+    public TileTypeGoal(int priority, bool canOverrideRandom, bool panic, Entity entity, Brain brain, string statusText, TileType tileType) : base(priority, canOverrideRandom, panic, entity, brain, statusText)
     {
         _tileType = tileType;
     }
@@ -25,11 +25,19 @@ public class TileTypeGoal : Goal
 
     public override void PerformTask()
     {
-        if (!Path.Any())
+        if (!Path.Any() || TargetCell is null)
         {
-            GoalCompleted();
+            GoalCompleted(true);
             return;
         }
+        
+        var target = _tileType.IsDecoration ? Entity.Level.GetMap().GetDecorationAtCell(TargetCell) : Entity.Level.GetMap().GetTileAtCell(TargetCell);
+        if (target is null || target.Type != _tileType)
+        {
+            GoalCompleted(true);
+            return;
+        }
+        
         if (_step >= Path.Count)
         {
             GoalCompleted();
@@ -63,7 +71,7 @@ public class TileTypeGoal : Goal
         }
         
         // if we are close enough to this step then we move towards the next step
-        if (Entity.Position.Distance(stepPos) <= 1.5)
+        if (Entity.Position.Distance(stepPos) <= 1)
         {
             _step++;
         }

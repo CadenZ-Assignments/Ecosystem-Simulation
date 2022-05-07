@@ -7,7 +7,7 @@ namespace Simulation_CSharp.Entities.AI.Goals;
 
 public class DrinkGoal : TileTypeGoal
 {
-    public DrinkGoal(int priority, Entity entity, Brain brain) : base(priority, true, entity, brain,  "Looking for water", TileTypes.WaterTile)
+    public DrinkGoal(int priority, Entity entity, Brain brain) : base(priority, true, false, entity, brain,  "Looking for water", TileTypes.WaterTile)
     {
     }
 
@@ -30,11 +30,11 @@ public class DrinkGoal : TileTypeGoal
 
     public override bool CanPick()
     {
-        return Entity.IsBelowTolerance(Entity.Thirst) && Entity.FindPathTo(TileTypes.WaterTile).Any();
+        return Entity.IsBelowTolerance(Entity.Thirst) && Entity.FindTile(TileTypes.WaterTile) is not null;
     }
 
     public override bool ShouldResume()
     {
-        return Entity.IsBelowTolerance(Entity.Thirst) && Entity.FindPathTo(TileTypes.WaterTile).Any();
+        return Entity.IsBelowTolerance(Entity.Thirst) && Entity.FindTile(TileTypes.WaterTile) is not null;
     }
 }

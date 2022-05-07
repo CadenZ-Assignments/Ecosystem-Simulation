@@ -1,13 +1,14 @@
-﻿using Simulation_CSharp.Utils;
+﻿using System.Security.Cryptography;
+using Simulation_CSharp.Utils;
 
 namespace Simulation_CSharp.Entities.Inheritance;
 
 public sealed class Gene
 {
-    public const int MaxReproductiveUrge = 100; 
-    
+    public const int MaxReproductiveUrge = 100;
+
     public readonly int MaxHealth;
-    public readonly int MaxSpeed;
+    public readonly float MaxSpeed;
     public readonly int MaxHunger;
     public readonly int MaxThirst;
     public readonly int MaxSensorRange;
@@ -17,8 +18,9 @@ public sealed class Gene
     public readonly bool LandBorne;
     public readonly bool AirBorne;
     public readonly Sex BiologicalSex;
-    
-    public Gene(int maxHealth, int maxSpeed, int maxThirst, int maxHunger, int maxSensorRange, int maxConstitution, int maxRandomness, bool waterBorne, bool landBorne, bool airBorne)
+
+    public Gene(int maxHealth, float maxSpeed, int maxThirst, int maxHunger, int maxSensorRange, int maxConstitution,
+        int maxRandomness, bool waterBorne, bool landBorne, bool airBorne)
     {
         MaxHealth = maxHealth;
         MaxSpeed = maxSpeed;
@@ -33,7 +35,8 @@ public sealed class Gene
         BiologicalSex = Helper.Chance(50) ? Sex.Male : Sex.Female;
     }
 
-    private Gene(int maxHealth, int maxSpeed, int maxThirst, int maxHunger, int maxSensorRange, int maxConstitution, int maxRandomness, bool waterBorne, bool landBorne, bool airBorne, Sex biologicalSex)
+    private Gene(int maxHealth, float maxSpeed, int maxThirst, int maxHunger, int maxSensorRange, int maxConstitution,
+        int maxRandomness, bool waterBorne, bool landBorne, bool airBorne, Sex biologicalSex)
     {
         MaxHealth = maxHealth;
         MaxSpeed = maxSpeed;
@@ -55,22 +58,47 @@ public sealed class Gene
         entity.Thirst = MaxThirst;
         entity.ReproductiveUrge = 0;
     }
-    
+
     public static Gene InheritFrom(Gene parent1, Gene parent2)
     {
         return new Gene(
-            Average(parent1.MaxHealth, parent2.MaxHealth),
-            Average(parent1.MaxSpeed, parent2.MaxSpeed),
-            Average(parent1.MaxThirst, parent2.MaxThirst),
-            Average(parent1.MaxHunger, parent2.MaxHunger),
-            Average(parent1.MaxSensorRange, parent2.MaxSensorRange),
-            Average(parent1.MaxConstitution, parent2.MaxConstitution),
-            Average(parent1.MaxRandomness, parent2.MaxRandomness),
+            InheritStats(parent1.MaxHealth, parent2.MaxHealth),
+            InheritStats(parent1.MaxSpeed, parent2.MaxSpeed),
+            InheritStats(parent1.MaxThirst, parent2.MaxThirst),
+            InheritStats(parent1.MaxHunger, parent2.MaxHunger),
+            InheritStats(parent1.MaxSensorRange, parent2.MaxSensorRange),
+            InheritStats(parent1.MaxConstitution, parent2.MaxConstitution),
+            InheritStats(parent1.MaxRandomness, parent2.MaxRandomness),
             parent1.WaterBorne,
             parent1.LandBorne,
             parent1.AirBorne,
             Helper.Chance(50) ? Sex.Male : Sex.Female
         );
+    }
+
+    private static float InheritStats(float parent1Stat, float parent2Stat)
+    {
+        if (!Helper.Chance(15)) return Average(parent1Stat, parent2Stat);
+
+        // 15% chance of mutation
+        return Helper.Chance(50)
+            ? Math.Clamp(Average(parent1Stat, parent2Stat) + RandomNumberGenerator.GetInt32(1, 3), 1, float.MaxValue)
+            : Math.Clamp(Average(parent1Stat, parent2Stat) - RandomNumberGenerator.GetInt32(1, 3), 1, float.MaxValue);
+    }
+
+    private static int InheritStats(int parent1Stat, int parent2Stat)
+    {
+        if (!Helper.Chance(15)) return Average(parent1Stat, parent2Stat);
+
+        // 15% chance of mutation
+        return Helper.Chance(50)
+            ? Math.Clamp(Average(parent1Stat, parent2Stat) + RandomNumberGenerator.GetInt32(1, 3), 1, int.MaxValue)
+            : Math.Clamp(Average(parent1Stat, parent2Stat) - RandomNumberGenerator.GetInt32(1, 3), 1, int.MaxValue);
+    }
+
+    private static float Average(float a, float b)
+    {
+        return (a + b) / 2;
     }
 
     private static int Average(int a, int b)

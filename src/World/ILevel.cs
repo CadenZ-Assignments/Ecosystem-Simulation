@@ -15,5 +15,5 @@ public interface ILevel
 
     public Entity? GetEntityByUuid(Guid guid);
 
-    public void CleanEntityRemovalQueue();
+    public void CleanQueues();
 }

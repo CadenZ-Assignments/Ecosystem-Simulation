@@ -9,7 +9,7 @@ public class EatBushGoal : TileTypeGoal
 {
     private int _startingHunger;
     
-    public EatBushGoal(int priority, Entity entity, Brain brain) : base(priority, true, entity, brain,  "Looking for food", TileTypes.GrownBushTile)
+    public EatBushGoal(int priority, Entity entity, Brain brain) : base(priority, true, false, entity, brain,  "Looking for food", TileTypes.GrownBushTile)
     {
     }
 
@@ -40,11 +40,11 @@ public class EatBushGoal : TileTypeGoal
 
     public override bool CanPick()
     {
-        return Entity.IsBelowTolerance(Entity.Hunger);
+        return Entity.IsBelowTolerance(Entity.Hunger) && Entity.FindTile(TileTypes.GrownBushTile) is not null;
     }
 
     public override bool ShouldResume()
     {
-        return Entity.IsBelowTolerance(Entity.Hunger);
+        return Entity.IsBelowTolerance(Entity.Hunger) && Entity.FindTile(TileTypes.GrownBushTile) is not null;
     }
 }

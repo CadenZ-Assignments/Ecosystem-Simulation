@@ -7,14 +7,16 @@ public abstract class Goal
     public string StatusText;
     public readonly int Priority;
     public readonly bool CanOverrideRandomness;
+    public readonly bool Panic;
     protected readonly Brain Brain;
     protected readonly Entity Entity;
     public bool Completed;
 
-    protected Goal(int priority, bool canOverrideRandomness, Entity entity, Brain brain, string statusText)
+    protected Goal(int priority, bool canOverrideRandomness, bool panic, Entity entity, Brain brain, string statusText)
     {
         Priority = priority;
         CanOverrideRandomness = canOverrideRandomness;
+        Panic = panic;
         Entity = entity;
         Brain = brain;
         StatusText = statusText;
@@ -53,16 +55,19 @@ public abstract class Goal
     /// </summary>
     /// <returns></returns>
     public abstract bool CanPick();
-    
+
     /// <summary>
     /// States that this goal is complete. Therefore will be removed from the available goals to select from. To make the goal available again override NeedToPerformTask (preferred) or call ResumeGoal 
     /// </summary>
-    public void GoalCompleted()
+    public void GoalCompleted(bool overrideOverride = false)
     {
-        if (!OnCompleted()) return;
+        if (!overrideOverride)
+        {
+            if (!OnCompleted()) return;
+        }
         Completed = true;
         Brain.GoalCompleted();
-        Raylib.TraceLog(TraceLogLevel.LOG_INFO, "Completed goal of " + StatusText);
+        Raylib.TraceLog(TraceLogLevel.LOG_DEBUG, "Completed goal of " + StatusText);
     }
 
     /// <summary>
@@ -71,6 +76,6 @@ public abstract class Goal
     public void ResumeGoal()
     {
         Completed = false;
-        Raylib.TraceLog(TraceLogLevel.LOG_INFO, "Resumed goal of " + StatusText);
+        Raylib.TraceLog(TraceLogLevel.LOG_DEBUG, "Resumed goal of " + StatusText);
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Raylib_cs;
-using Simulation_CSharp.Core;
 
 namespace Simulation_CSharp.Utils.Widgets;
 
@@ -45,7 +44,7 @@ public class TooltipRenderer
     {
         Raylib.DrawText(text, (int) _rectX + 5, (int) _rectY + (int) _contentYModifier, 5, Color.WHITE);
 
-        if (_rectWidth < text.Length + 10)
+        if (_rectWidth < text.Length*10 + 10)
         {
             _rectWidth = text.Length*10 + 10;
         }

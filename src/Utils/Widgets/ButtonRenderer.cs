@@ -37,9 +37,9 @@ public class ButtonRenderer
             GetColor()
         );
         
-        Raylib.DrawText(_text, (int) (RectX + RectWidth / 8), (int) (RectY + _rectHeight / 4), 20, Color.WHITE);
+        Raylib.DrawText(_text, (RectX + RectWidth / 8), (RectY + _rectHeight / 4), 20, Color.WHITE);
 
-        if (!Helper.IsMousePosOverAreaUI(new Vector2(RectX, RectY), (int) RectWidth, (int) _rectHeight)) return;
+        if (!Helper.IsMousePosOverAreaUI(new Vector2(RectX, RectY), RectWidth, _rectHeight)) return;
         if (Raylib.IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT))
         {
             _onPress(this);
@@ -48,6 +48,6 @@ public class ButtonRenderer
 
     private Color GetColor()
     {
-        return Helper.IsMousePosOverAreaUI(new Vector2(RectX, RectY), (int) RectWidth, (int) _rectHeight) || IsSelected ? SimulationColors.WidgetHoverColor : SimulationColors.WidgetBackgroundColor;
+        return Helper.IsMousePosOverAreaUI(new Vector2(RectX, RectY), RectWidth, _rectHeight) || IsSelected ? SimulationColors.WidgetHoverColor : SimulationColors.WidgetBackgroundColor;
     }
 }

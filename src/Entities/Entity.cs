@@ -14,6 +14,7 @@ public abstract class Entity
 {
     protected readonly Lazy<Brain> Brain;
     public readonly Gene Genetics;
+    public readonly bool IsBaby;
     public TileCell Position = null!;
     public ILevel Level = null!;
 
@@ -28,22 +29,32 @@ public abstract class Entity
 
     public virtual Lazy<string> TexturePath => new(() => "entities\\" + EntityName.FileSafeFormat() + ".png");
 
-    protected Entity(Gene genetics, string entityName)
+    protected Entity(Gene genetics, string entityName, bool isBaby = false)
     {
         Genetics = genetics;
         EntityName = entityName;
+        IsBaby = isBaby;
         Uuid = Guid.NewGuid();
-        Brain = new Lazy<Brain>(CreateBrain);
+        Brain = new Lazy<Brain>(() =>
+        {
+            var brain = CreateBrain();
+            brain.FinishRegistering();
+            return brain;
+        });
         Genetics.InfluenceStats(this);
     }
 
+    /// <summary>
+    /// Called by ReproduceGoal to make babies
+    /// </summary>
+    public abstract void MakeBaby(Entity mate);
+    
     protected abstract Brain CreateBrain();
 
     public virtual void Render()
     {
         var texture = ResourceLoader.GetTexture(TexturePath.Value);
         var mouseOver = Helper.IsMousePosOverArea(Position.TruePosition, texture.width, texture.height);
-
         Raylib.DrawTexture(texture, (int) Position.TruePosition.X, (int) Position.TruePosition.Y, GetRenderColor(mouseOver));
         RenderHoverTooltip(texture, mouseOver);
     }
@@ -56,6 +67,13 @@ public abstract class Entity
         }
         
         Brain.Value.Update();
+
+        if (Health <= 0)
+        {
+            Destroy();
+            Raylib.TraceLog(TraceLogLevel.LOG_INFO, EntityName + " Died");
+            return;
+        }
         
         if (Helper.Chance(1))
         {
@@ -124,6 +142,13 @@ public abstract class Entity
         Brain.Value.PathFinder.Init(map.GetTileAtCell(Position)!, map.GetTileAtCell(entity.Position)!, map.GetGrid());
         return Brain.Value.PathFinder.FindPath();
     }
+    
+    public List<TileCell> FindPathTo(Entity match)
+    {
+        var map = Level.GetMap();
+        Brain.Value.PathFinder.Init(map.GetTileAtCell(Position)!, map.GetTileAtCell(match.Position)!, map.GetGrid());
+        return Brain.Value.PathFinder.FindPath();
+    }
 
     /// <summary>
     /// Moves entity towards the target location give
@@ -132,7 +157,8 @@ public abstract class Entity
     /// <returns>Returns false if entity can not walk on target location.</returns>
     public bool MoveTowardsLocation(Vector2 position)
     {
-        var targetPos = new TileCell(Vector2.Lerp(Position.TruePosition, position, 0.008F * Genetics.MaxSpeed * SimulationCore.Time));
+        var speed = 0.4F * Genetics.MaxSpeed * SimulationCore.Time;
+        var targetPos = new TileCell(position);
 
         // can not walk out of map
         if (!Level.GetMap().ExistInRange(targetPos.X, targetPos.Y))
@@ -148,7 +174,7 @@ public abstract class Entity
             return false;
         }
 
-        Position = targetPos;
+        Position = new TileCell(Helper.MoveTowards(Position.TruePosition, position, speed));
 
         if (Helper.Chance(2))
         {
@@ -192,18 +218,29 @@ public abstract class Entity
         var rectX = Position.TruePosition.X + 40;
         var rectY = Position.TruePosition.Y - 45;
 
-        var tooltipRenderer = new TooltipRenderer(rectX, rectY, 10, 10);
+        var tooltipRenderer = new TooltipRenderer(rectX, rectY, 200, 10);
 
         tooltipRenderer.DrawText(EntityName + " - " + Genetics.BiologicalSex);
         tooltipRenderer.DrawText(Brain.Value.GetStatus() + "..");
-        tooltipRenderer.DrawSpace(15);
+        tooltipRenderer.DrawSpace(5);
+        tooltipRenderer.DrawText("Speed: " + Genetics.MaxSpeed);
+        tooltipRenderer.DrawText("Sensor Range: " + Genetics.MaxSensorRange);
+        tooltipRenderer.DrawSpace(5);
         tooltipRenderer.DrawProgressBar("Health", Genetics.MaxHealth, Health);
         tooltipRenderer.DrawProgressBar("Hunger", Genetics.MaxHunger, Hunger);
         tooltipRenderer.DrawProgressBar("Thirst", Genetics.MaxThirst, Thirst);
-        tooltipRenderer.DrawProgressBar("Reproductive Urge", Gene.MaxReproductiveUrge, ReproductiveUrge);
+        if (!IsBaby)
+        {
+            tooltipRenderer.DrawProgressBar("Reproductive Urge", Gene.MaxReproductiveUrge, ReproductiveUrge);
+        }
+        RenderAdditionalTooltip(tooltipRenderer);
         tooltipRenderer.DrawBackground();
     }
 
+    protected virtual void RenderAdditionalTooltip(TooltipRenderer renderer)
+    {
+    }
+    
     /// <summary>
     /// Find the closest tile of type in Entity's Sensor Range
     /// </summary>
@@ -240,6 +277,26 @@ public abstract class Entity
         }
 
         return bestSoFar;
+    }
+    
+    /// <summary>
+    /// Locates the closest tile in the given list
+    /// </summary>
+    /// <param name="cells"></param>
+    /// <returns></returns>
+    public TileCell ClosestTileCell(List<TileCell> cells)
+    {
+        TileCell? closest = null;
+
+        foreach (var cell in cells)
+        {
+            if (closest is null || Position.Distance(cell) < Position.Distance(closest))
+            {
+                closest = cell;
+            }
+        }
+
+        return closest!;
     }
 
     /// <summary>

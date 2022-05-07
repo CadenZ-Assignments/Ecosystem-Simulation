@@ -1,6 +1,8 @@
 ﻿using System.Numerics;
 using Raylib_cs;
 using Simulation_CSharp.Entities;
+using Simulation_CSharp.Entities.Sheep;
+using Simulation_CSharp.Entities.Wolf;
 using Simulation_CSharp.Tiles;
 using Simulation_CSharp.Utils;
 using Simulation_CSharp.Utils.Widgets;
@@ -12,6 +14,8 @@ public static class Updater
 {
     public static ILevel Level = null!;
 
+    private static readonly GraphRenderer GraphRenderer = new GraphRenderer(-4000, 16);
+    
     public static void Update(ref Camera2D camera)
     {
         Input(ref camera);
@@ -19,6 +23,7 @@ public static class Updater
         Raylib.ClearBackground(new Color(40, 40, 40, 255));
         CameraModification(ref camera);
         RenderMap();
+        GraphRenderer.Render();
         RenderEntities();
         Raylib.EndMode2D();
         RenderHud();
@@ -36,7 +41,7 @@ public static class Updater
         });
         if (SimulationCore.Time != 0)
         {
-            Level.CleanEntityRemovalQueue();
+            Level.CleanQueues();
         }
     }
 
@@ -49,7 +54,7 @@ public static class Updater
         }
     }
 
-    private static readonly ButtonManager ButtonManager = new("Spawn Sheep", "Spawn Bush");
+    private static readonly ButtonManager ButtonManager = new("Spawn Sheep", "Spawn Wolf", "Spawn Bush", "Clear Entities");
 
     private static void RenderHud()
     {
@@ -123,10 +128,19 @@ public static class Updater
                 switch (ButtonManager.Selected)
                 {
                     case 0:
-                        SpawnAtMouse(ref camera, () => new SheepEntity());
+                        SpawnAtMouse(ref camera, () => new Sheep());
                         break;
                     case 1:
+                        SpawnAtMouse(ref camera, () => new Wolf());
+                        break;
+                    case 2:
                         PlaceAtMouse(ref camera, TileTypes.GrownBushTile, false);
+                        break;
+                    case 3:
+                        foreach (var entity in Level.GetEntities())
+                        {
+                            Level.RemoveEntity(entity);
+                        }
                         break;
                 }
             }

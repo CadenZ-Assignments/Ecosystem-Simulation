@@ -5,28 +5,35 @@ namespace Simulation_CSharp.Entities.AI.Goals;
 
 public class ReproduceGoal : Goal
 {
-    private Predicate<Entity> match;
-    private Entity? _targetEntity;
+    private readonly Predicate<Entity> _match;
+    private Entity? _mate;
     private int _step;
     
-    public ReproduceGoal(int priority, Entity entity, Brain brain) : base(priority, false, entity, brain, "Looking for a mate")
+    public ReproduceGoal(int priority, Entity entity, Brain brain) : base(priority, false, false, entity, brain, "Looking for a mate")
     {
-        match = entity1 => entity1.SameSpecieAs(Entity) &&
+        _match = entity1 => entity1.SameSpecieAs(Entity) &&
                            entity1.Genetics.BiologicalSex == Entity.Genetics.BiologicalSex.Opposite() &&
-                           entity1 != Entity;
+                           entity1 != Entity && 
+                           entity1.ReproductiveUrge > 50;
     }
 
     public override void OnPicked()
     {
-        _targetEntity = Entity.FindEntity(match);
+        _mate = Entity.FindEntity(_match);
         StatusText = "Looking for a mate";
         _step = 0;
     }
 
     public override void PerformTask()
     {
-        var path = Entity.FindPathTo(match);
-        _step = path.IndexOf(ClosestTileCell(path));
+        if (_mate is null)
+        {
+            GoalCompleted();
+            return;
+        }
+        
+        var path = Entity.FindPathTo(_mate);
+        _step = path.IndexOf(Entity.ClosestTileCell(path));
         TileCell stepPos;
         
         try
@@ -46,6 +53,7 @@ public class ReproduceGoal : Goal
 
         if (Entity.Position.Distance(path.Last()) <= 0.5)
         {
+            Entity.MakeBaby(_mate);
             Entity.ReproductiveUrge = 0;
             GoalCompleted();
         }
@@ -53,26 +61,11 @@ public class ReproduceGoal : Goal
 
     public override bool ShouldResume()
     {
-        return Entity.ReproductiveUrge > 60;
+        return Entity.ReproductiveUrge > 50 && Entity.FindEntity(_match) is not null;
     }
 
     public override bool CanPick()
     {
-        return Entity.ReproductiveUrge > 60 && Entity.FindEntity(match) is not null;
-    }
-
-    private TileCell ClosestTileCell(List<TileCell> cells)
-    {
-        TileCell? closest = null;
-
-        foreach (var cell in cells)
-        {
-            if (closest is null || Entity.Position.Distance(cell) < Entity.Position.Distance(closest))
-            {
-                closest = cell;
-            }
-        }
-
-        return closest!;
+        return Entity.ReproductiveUrge > 50 && Entity.FindEntity(_match) is not null;
     }
 }

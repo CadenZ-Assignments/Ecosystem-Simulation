@@ -9,27 +9,50 @@ namespace Simulation_CSharp.Entities.AI;
 public class Brain
 {
     public readonly IPathFindingAgent<Tile> PathFinder;
-    protected readonly Entity Entity;
-    protected readonly List<Goal> Goals;
-    protected Goal? CurrentGoal;
+    private readonly Entity _entity;
+    private readonly List<Goal> _goals;
+    private readonly List<Goal> _panicGoals;
+    private Goal? _currentGoal;
     
     public Brain(Entity entity, IPathFindingAgent<Tile> pathFinder)
     {
         PathFinder = pathFinder;
-        Entity = entity;
-        Goals = new List<Goal>();
+        _entity = entity;
+        _goals = new List<Goal>();
+        _panicGoals = new List<Goal>();
     }
 
     public virtual void Update()
     {
-        if (CurrentGoal == null)
+        if (_currentGoal == null)
         {
             if (Helper.Chance(1*SimulationCore.Time))
             {
                 RefreshGoal();
             }
         }
-        CurrentGoal?.PerformTask();
+
+        foreach (var panicGoal in _panicGoals)
+        {
+            if (panicGoal.ShouldResume())
+            {
+                panicGoal.ResumeGoal();
+            }
+
+            if (panicGoal.Completed)
+            {
+                continue;
+            }
+
+            if (!panicGoal.CanPick())
+            {
+                continue;
+            }
+            
+            SetGoal(panicGoal);
+        }
+        
+        _currentGoal?.PerformTask();
     }
     
     public void GoalCompleted()
@@ -39,25 +62,40 @@ public class Brain
 
     public void RegisterGoal(Goal goal)
     {
-        Goals.Add(goal);
+        if (goal.Panic)
+        {
+            _panicGoals.Add(goal);
+            return;
+        }
+        _goals.Add(goal);
+    }
+
+    public void FinishRegistering()
+    {
+        SortPriority();
     }
 
     public void RefreshGoal()
     {
-        CurrentGoal = PickGoal();
-        CurrentGoal?.OnPicked();
+        SetGoal(PickGoal());
+    }
+
+    public void SetGoal(Goal? goal)
+    {
+        _currentGoal = goal;
+        _currentGoal?.OnPicked();
     }
 
     public string GetStatus()
     {
-        return CurrentGoal == null ? "Idling" : CurrentGoal.StatusText;
+        return _currentGoal == null ? "Idling" : _currentGoal.StatusText;
     }
     
-    protected virtual Goal? PickGoal()
+    private Goal? PickGoal()
     {
         Goal? picked = null;
         
-        foreach (var goal in Goals)
+        foreach (var goal in _goals)
         {
             if (goal.ShouldResume())
             {
@@ -75,11 +113,11 @@ public class Brain
             }
             
             // have a chance (defined by genetics) to not pick the most important task at hand
-            if (Helper.Chance(Entity.Genetics.MaxRandomness))
+            if (Helper.Chance(_entity.Genetics.MaxRandomness))
             {
                 if (!goal.CanOverrideRandomness)
                 {
-                    Raylib.TraceLog(TraceLogLevel.LOG_INFO, "Randomly skipped goal of " + goal.StatusText);
+                    Raylib.TraceLog(TraceLogLevel.LOG_DEBUG, "Randomly skipped goal of " + goal.StatusText);
                     continue;
                 }
             }
@@ -96,9 +134,21 @@ public class Brain
 
         if (picked != null)
         {
-            Raylib.TraceLog(TraceLogLevel.LOG_INFO, "Picked new goal of " + picked.StatusText);
+            Raylib.TraceLog(TraceLogLevel.LOG_DEBUG, "Picked new goal of " + picked.StatusText);
         }
         
         return picked;
+    }
+
+    private void SortPriority()
+    {
+        _panicGoals.Sort((goal, goal1) =>
+        {
+            if (goal.Priority < goal1.Priority)
+            {
+                return -1;
+            }
+            return goal.Priority == goal1.Priority ? 0 : 1;
+        });
     }
 }

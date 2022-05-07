@@ -12,12 +12,14 @@ public class Level : ILevel
     public const int WorldHeight = 256;
         
     private readonly List<Entity> _entities;
+    private readonly Queue<(Func<Entity>, TileCell)> _additionQueue;
     private readonly Queue<Entity> _removalQueue;
     private readonly IMap _map;
         
     public Level()
     {
         _entities = new List<Entity>();
+        _additionQueue = new Queue<(Func<Entity>, TileCell)>();
         _removalQueue = new Queue<Entity>();
         _map = new Map(WorldWidth, WorldHeight, this);
     }
@@ -25,22 +27,7 @@ public class Level : ILevel
     public void CreateEntity(Func<Entity> entity, TileCell position)
     {
         Raylib.TraceLog(TraceLogLevel.LOG_INFO, "Attempting to create an entity");
-
-        var entityCreated = entity.Invoke();
-        var eventInfo = new EntityCreateEvent(this, entityCreated, position);
-        var eventRes = EventHook.OnPreEntityCreate(eventInfo);
-
-        if (eventRes is not null && !(bool) eventRes)
-        {
-            Raylib.TraceLog(TraceLogLevel.LOG_INFO, "Entity creation request canceled by event");
-            return;
-        }
-            
-        entityCreated.Position = position;
-        entityCreated.Level = this;
-        _entities.Add(entityCreated);
-        Raylib.TraceLog(TraceLogLevel.LOG_INFO, "Added Entity");
-        EventHook.OnPostEntityCreate(eventInfo);
+        _additionQueue.Enqueue((entity, position));
     }
 
     public void RemoveEntity(Entity entity)
@@ -65,8 +52,30 @@ public class Level : ILevel
         }
     }
 
-    public void CleanEntityRemovalQueue()
+    public void CleanQueues()
     {
+        for (var i = 0; i < _additionQueue.Count; i++)
+        {
+            var item = _additionQueue.Dequeue();
+            var entityCreated = item.Item1.Invoke();
+            var eventInfo = new EntityCreateEvent(this, entityCreated, item.Item2);
+            var eventRes = EventHook.OnPreEntityCreate(eventInfo);
+
+            if (eventRes is not null && !(bool) eventRes)
+            {
+                Raylib.TraceLog(TraceLogLevel.LOG_INFO, "Entity creation request canceled by event");
+                return;
+            }
+            
+            entityCreated.Position = item.Item2;
+            entityCreated.Level = this;
+            
+            _entities.Add(entityCreated);
+            EventHook.OnPostEntityCreate(eventInfo);
+            
+            Raylib.TraceLog(TraceLogLevel.LOG_INFO, "Added Entity");
+        }
+        
         for (var i = 0; i < _removalQueue.Count; i++)
         {
             _entities.Remove(_removalQueue.Dequeue());
