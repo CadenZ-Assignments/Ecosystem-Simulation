@@ -98,7 +98,9 @@ public class MainMenu
             color3 = Color.WHITE;
             if (Raylib.IsMouseButtonDown(MouseButton.MOUSE_BUTTON_LEFT))
             {
-                Raylib.CloseWindow();
+                scene = Scene.MainMenu;
+                SimulationCore.Close = true;
+                return;
             }
         }
         else
