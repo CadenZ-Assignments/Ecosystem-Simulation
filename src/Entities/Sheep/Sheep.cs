@@ -13,7 +13,7 @@ public class Sheep : Entity
         
     }
 
-    public Sheep() : this(new Gene(20, 1, 100, 100, 18, 1, 10, false, true, false))
+    public Sheep() : this(new Gene(20, 1, 100, 100, 18, 1, 10, false, true, false, 1))
     {
         
     }
@@ -31,12 +31,10 @@ public class Sheep : Entity
 
     public override void MakeBaby(Entity mate)
     {
-        if (mate is Sheep)
+        if (mate is not Sheep) return;
+        for (var i = 0; i < RandomNumberGenerator.GetInt32(1, 4); i++)
         {
-            for (var i = 0; i < RandomNumberGenerator.GetInt32(1, 4); i++)
-            {
-                Level.CreateEntity(() => BabySheep.CreateBaby(this, (Sheep) mate), Position);
-            }
+            Level.CreateEntity(() => BabySheep.CreateBaby(this, (Sheep) mate), Position);
         }
     }
 }

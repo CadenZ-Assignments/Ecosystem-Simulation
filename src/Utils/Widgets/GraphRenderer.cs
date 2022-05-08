@@ -27,11 +27,13 @@ public class GraphRenderer
         // background
         Raylib.DrawRectangle(_xPos, _yPos, Width, Height, Color.GRAY);
         
-        // axis
+        // x axis
         Raylib.DrawLineEx(new Vector2(_xPos + Gap, _yPos + Height - Gap), new Vector2(_xPos + Width - Gap, _yPos + Height - Gap), 5, Color.BLACK);
+        // y axis
         Raylib.DrawLineEx(new Vector2(_xPos + Gap, _yPos + Gap), new Vector2(_xPos + Gap, _yPos + Height - Gap), 5, Color.BLACK);
         
         // labels
-        // Raylib.DrawText();
+        Raylib.DrawText("Time", _xPos + Width/2 - Raylib.MeasureText("Time", 40), _yPos + Height - Gap + 50, 40, Color.BLACK);
+        Raylib.DrawTextPro(Raylib.GetFontDefault(), "Data", new Vector2(_xPos + Gap - 80, _yPos + Height / 2 - 10), Vector2.Zero, 270, 40, 1, Color.BLACK);
     }
 }

@@ -18,9 +18,9 @@ public sealed class Gene
     public readonly bool LandBorne;
     public readonly bool AirBorne;
     public readonly Sex BiologicalSex;
+    public readonly int ReproductiveUrgeModifier;
 
-    public Gene(int maxHealth, float maxSpeed, int maxThirst, int maxHunger, int maxSensorRange, int maxConstitution,
-        int maxRandomness, bool waterBorne, bool landBorne, bool airBorne)
+    public Gene(int maxHealth, float maxSpeed, int maxThirst, int maxHunger, int maxSensorRange, int maxConstitution, int maxRandomness, bool waterBorne, bool landBorne, bool airBorne, int reproductiveUrgeModifier)
     {
         MaxHealth = maxHealth;
         MaxSpeed = maxSpeed;
@@ -32,11 +32,11 @@ public sealed class Gene
         WaterBorne = waterBorne;
         LandBorne = landBorne;
         AirBorne = airBorne;
+        ReproductiveUrgeModifier = reproductiveUrgeModifier;
         BiologicalSex = Helper.Chance(50) ? Sex.Male : Sex.Female;
     }
 
-    private Gene(int maxHealth, float maxSpeed, int maxThirst, int maxHunger, int maxSensorRange, int maxConstitution,
-        int maxRandomness, bool waterBorne, bool landBorne, bool airBorne, Sex biologicalSex)
+    private Gene(int maxHealth, float maxSpeed, int maxThirst, int maxHunger, int maxSensorRange, int maxConstitution, int maxRandomness, bool waterBorne, bool landBorne, bool airBorne, Sex biologicalSex, int reproductiveUrgeModifier)
     {
         MaxHealth = maxHealth;
         MaxSpeed = maxSpeed;
@@ -49,6 +49,7 @@ public sealed class Gene
         LandBorne = landBorne;
         AirBorne = airBorne;
         BiologicalSex = biologicalSex;
+        ReproductiveUrgeModifier = reproductiveUrgeModifier;
     }
 
     public void InfluenceStats(Entity entity)
@@ -72,7 +73,8 @@ public sealed class Gene
             parent1.WaterBorne,
             parent1.LandBorne,
             parent1.AirBorne,
-            Helper.Chance(50) ? Sex.Male : Sex.Female
+            Helper.Chance(50) ? Sex.Male : Sex.Female,
+            InheritStats(parent1.ReproductiveUrgeModifier, parent2.ReproductiveUrgeModifier)
         );
     }
 

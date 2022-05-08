@@ -13,7 +13,7 @@ public class Wolf : Entity
         
     }
 
-    public Wolf() : this(new Gene(20, 2, 100, 100, 20, 1, 10, false, true, false))
+    public Wolf() : this(new Gene(20, 2, 100, 100, 26, 1, 10, false, true, false, 2))
     {
         
     }
@@ -31,7 +31,7 @@ public class Wolf : Entity
     public override void MakeBaby(Entity mate)
     {
         if (mate is not Wolf) return;
-        for (var i = 0; i < RandomNumberGenerator.GetInt32(4, 7); i++)
+        for (var i = 0; i < RandomNumberGenerator.GetInt32(1, 4); i++)
         {
             Level.CreateEntity(() => BabyWolf.CreateBaby(this, (Wolf) mate), Position);
         }

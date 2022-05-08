@@ -75,19 +75,20 @@ public abstract class Entity
             return;
         }
         
-        if (Helper.Chance(1))
+        if (Helper.Chance(1 * SimulationCore.Time))
         {
             if (ReproductiveUrge < 100)
             {
-                ReproductiveUrge++;
+                ReproductiveUrge += 1 * SimulationCore.Time * Genetics.ReproductiveUrgeModifier;
+                ReproductiveUrge = Math.Clamp(ReproductiveUrge, 0, 100);
             }
         }
 
         if (IsBelowRequirement(Thirst) || IsBelowRequirement(Hunger))
         {
-            if (Helper.Chance(2))
+            if (Helper.Chance(2 * SimulationCore.Time))
             {
-                Health--;
+                Health -= 1 * SimulationCore.Time;
             }
         }
 
@@ -225,6 +226,7 @@ public abstract class Entity
         tooltipRenderer.DrawSpace(5);
         tooltipRenderer.DrawText("Speed: " + Genetics.MaxSpeed);
         tooltipRenderer.DrawText("Sensor Range: " + Genetics.MaxSensorRange);
+        tooltipRenderer.DrawText("Constitution: " + Genetics.MaxConstitution);
         tooltipRenderer.DrawSpace(5);
         tooltipRenderer.DrawProgressBar("Health", Genetics.MaxHealth, Health);
         tooltipRenderer.DrawProgressBar("Hunger", Genetics.MaxHunger, Hunger);

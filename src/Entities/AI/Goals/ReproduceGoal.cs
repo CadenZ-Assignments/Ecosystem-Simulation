@@ -33,6 +33,13 @@ public class ReproduceGoal : Goal
         }
         
         var path = Entity.FindPathTo(_mate);
+
+        if (!path.Any())
+        {
+            GoalCompleted();
+            return;
+        }
+        
         _step = path.IndexOf(Entity.ClosestTileCell(path));
         TileCell stepPos;
         
