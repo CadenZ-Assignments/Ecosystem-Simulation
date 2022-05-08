@@ -39,7 +39,7 @@ public class GrowingBushTileType : TileType
             base.Render();
             
             var texture = ResourceLoader.GetTexture(Type.TexturePath.Value);
-            var mouseOver = Helper.IsMousePosOverArea(Position.TruePosition, texture.width, texture.height);
+            var mouseOver = Helper.IsMousePosOverArea(Position.TruePosition, texture.width, texture.height, ref SimulationCore.Camera2D);
 
             if (!mouseOver) return;
             

@@ -1,4 +1,5 @@
 ﻿using System.Security.Cryptography;
+using Raylib_cs;
 using Simulation_CSharp.Entities.AI;
 using Simulation_CSharp.Entities.AI.Goals;
 using Simulation_CSharp.Entities.Inheritance;
@@ -13,7 +14,7 @@ public class Sheep : Entity
         
     }
 
-    public Sheep() : this(new Gene(20, 1, 100, 100, 18, 1, 10, false, true, false, 1))
+    public Sheep() : this(new Gene(20, 1, 100, 100, 18, 1, 10, false, true, false, 1, 1))
     {
         
     }
@@ -32,7 +33,7 @@ public class Sheep : Entity
     public override void MakeBaby(Entity mate)
     {
         if (mate is not Sheep) return;
-        for (var i = 0; i < RandomNumberGenerator.GetInt32(1, 4); i++)
+        for (var i = 0; i < Raylib.GetRandomValue(1, 4); i++)
         {
             Level.CreateEntity(() => BabySheep.CreateBaby(this, (Sheep) mate), Position);
         }

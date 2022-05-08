@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using System.Security.Cryptography;
+using Raylib_cs;
 using Simulation_CSharp.Core;
 using Simulation_CSharp.Tiles;
 
@@ -19,8 +20,8 @@ public class RandomWalkGoal : Goal
 
     public override void OnPicked()
     {
-        _direction = RandomNumberGenerator.GetInt32(1, 9);
-        _walkTime = RandomNumberGenerator.GetInt32(100, 600);
+        _direction = Raylib.GetRandomValue(1, 8);
+        _walkTime = Raylib.GetRandomValue(100, 600);
         
         Vector2 dir;
 

@@ -18,4 +18,8 @@ public interface ILevel
     public Entity? GetEntityByUuid(Guid guid);
 
     public void CleanQueues();
+
+    public int GetWorldWidth();
+
+    public int GetWorldHeight();
 }

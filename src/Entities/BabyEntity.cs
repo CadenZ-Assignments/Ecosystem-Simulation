@@ -21,7 +21,7 @@ public abstract class BabyEntity : Entity
     public override void Update()
     {
         base.Update();
-        GrowthCountDown += 1 * SimulationCore.Time;
+        GrowthCountDown += 1 * SimulationCore.Time * Genetics.GrowthAcceleration;
         if (GrowthCountDown >= 5000)
         {
             Level.CreateEntity(() => new Sheep.Sheep(), Position);

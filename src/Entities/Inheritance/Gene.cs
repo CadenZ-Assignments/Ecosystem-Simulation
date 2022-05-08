@@ -1,4 +1,5 @@
 ﻿using System.Security.Cryptography;
+using Raylib_cs;
 using Simulation_CSharp.Utils;
 
 namespace Simulation_CSharp.Entities.Inheritance;
@@ -19,8 +20,9 @@ public sealed class Gene
     public readonly bool AirBorne;
     public readonly Sex BiologicalSex;
     public readonly int ReproductiveUrgeModifier;
+    public readonly int GrowthAcceleration;
 
-    public Gene(int maxHealth, float maxSpeed, int maxThirst, int maxHunger, int maxSensorRange, int maxConstitution, int maxRandomness, bool waterBorne, bool landBorne, bool airBorne, int reproductiveUrgeModifier)
+    public Gene(int maxHealth, float maxSpeed, int maxThirst, int maxHunger, int maxSensorRange, int maxConstitution, int maxRandomness, bool waterBorne, bool landBorne, bool airBorne, int reproductiveUrgeModifier, int growthAcceleration)
     {
         MaxHealth = maxHealth;
         MaxSpeed = maxSpeed;
@@ -33,10 +35,11 @@ public sealed class Gene
         LandBorne = landBorne;
         AirBorne = airBorne;
         ReproductiveUrgeModifier = reproductiveUrgeModifier;
+        GrowthAcceleration = growthAcceleration;
         BiologicalSex = Helper.Chance(50) ? Sex.Male : Sex.Female;
     }
 
-    private Gene(int maxHealth, float maxSpeed, int maxThirst, int maxHunger, int maxSensorRange, int maxConstitution, int maxRandomness, bool waterBorne, bool landBorne, bool airBorne, Sex biologicalSex, int reproductiveUrgeModifier)
+    private Gene(int maxHealth, float maxSpeed, int maxThirst, int maxHunger, int maxSensorRange, int maxConstitution, int maxRandomness, bool waterBorne, bool landBorne, bool airBorne, Sex biologicalSex, int reproductiveUrgeModifier, int growthAcceleration)
     {
         MaxHealth = maxHealth;
         MaxSpeed = maxSpeed;
@@ -50,6 +53,7 @@ public sealed class Gene
         AirBorne = airBorne;
         BiologicalSex = biologicalSex;
         ReproductiveUrgeModifier = reproductiveUrgeModifier;
+        GrowthAcceleration = growthAcceleration;
     }
 
     public void InfluenceStats(Entity entity)
@@ -74,7 +78,8 @@ public sealed class Gene
             parent1.LandBorne,
             parent1.AirBorne,
             Helper.Chance(50) ? Sex.Male : Sex.Female,
-            InheritStats(parent1.ReproductiveUrgeModifier, parent2.ReproductiveUrgeModifier)
+            InheritStats(parent1.ReproductiveUrgeModifier, parent2.ReproductiveUrgeModifier),
+            InheritStats(parent1.GrowthAcceleration, parent2.GrowthAcceleration)
         );
     }
 
@@ -84,8 +89,8 @@ public sealed class Gene
 
         // 15% chance of mutation
         return Helper.Chance(50)
-            ? Math.Clamp(Average(parent1Stat, parent2Stat) + RandomNumberGenerator.GetInt32(1, 3), 1, float.MaxValue)
-            : Math.Clamp(Average(parent1Stat, parent2Stat) - RandomNumberGenerator.GetInt32(1, 3), 1, float.MaxValue);
+            ? Math.Clamp(Average(parent1Stat, parent2Stat) + Raylib.GetRandomValue(1, 4), 1, float.MaxValue)
+            : Math.Clamp(Average(parent1Stat, parent2Stat) - Raylib.GetRandomValue(1, 4), 1, float.MaxValue);
     }
 
     private static int InheritStats(int parent1Stat, int parent2Stat)
@@ -94,8 +99,8 @@ public sealed class Gene
 
         // 15% chance of mutation
         return Helper.Chance(50)
-            ? Math.Clamp(Average(parent1Stat, parent2Stat) + RandomNumberGenerator.GetInt32(1, 3), 1, int.MaxValue)
-            : Math.Clamp(Average(parent1Stat, parent2Stat) - RandomNumberGenerator.GetInt32(1, 3), 1, int.MaxValue);
+            ? Math.Clamp(Average(parent1Stat, parent2Stat) + Raylib.GetRandomValue(1, 4), 1, int.MaxValue)
+            : Math.Clamp(Average(parent1Stat, parent2Stat) - Raylib.GetRandomValue(1, 4), 1, int.MaxValue);
     }
 
     private static float Average(float a, float b)

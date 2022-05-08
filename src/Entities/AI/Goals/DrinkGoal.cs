@@ -1,4 +1,5 @@
 ﻿using System.Security.Cryptography;
+using Raylib_cs;
 using Simulation_CSharp.Core;
 using Simulation_CSharp.Tiles;
 using Simulation_CSharp.Utils;
@@ -20,7 +21,7 @@ public class DrinkGoal : TileTypeGoal
     public override bool OnCompleted()
     {
         // if is not thirsty then we can complete
-        if (Entity.Genetics.MaxThirst - Entity.Thirst < RandomNumberGenerator.GetInt32(1, 10)) return true;
+        if (Entity.Genetics.MaxThirst - Entity.Thirst < Raylib.GetRandomValue(1, 10)) return true;
         // if not we add thirst and stop goal from completing
         if (!Helper.Chance(30*SimulationCore.Time)) return false;
         StatusText = "Drinking";

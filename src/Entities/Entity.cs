@@ -54,7 +54,7 @@ public abstract class Entity
     public virtual void Render()
     {
         var texture = ResourceLoader.GetTexture(TexturePath.Value);
-        var mouseOver = Helper.IsMousePosOverArea(Position.TruePosition, texture.width, texture.height);
+        var mouseOver = Helper.IsMousePosOverArea(Position.TruePosition, texture.width, texture.height, ref SimulationCore.Camera2D);
         Raylib.DrawTexture(texture, (int) Position.TruePosition.X, (int) Position.TruePosition.Y, GetRenderColor(mouseOver));
         RenderHoverTooltip(texture, mouseOver);
     }
@@ -92,7 +92,7 @@ public abstract class Entity
             }
         }
 
-        if (Position.X is > World.Level.WorldWidth or < 0 || Position.Y is > World.Level.WorldHeight or < 0)
+        if (Position.X > Level.GetWorldWidth() || Position.X < 0 || Position.Y > Level.GetWorldHeight() || Position.Y < 0)
         {
             Destroy();
         }

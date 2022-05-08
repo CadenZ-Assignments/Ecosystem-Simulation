@@ -1,5 +1,4 @@
-﻿using System;
-using System.Numerics;
+﻿using System.Numerics;
 using Raylib_cs;
 using Simulation_CSharp.Entities;
 using Simulation_CSharp.Entities.Sheep;
@@ -8,6 +7,7 @@ using Simulation_CSharp.Tiles;
 using Simulation_CSharp.Utils;
 using Simulation_CSharp.Utils.Widgets;
 using Simulation_CSharp.World;
+using static Raylib_cs.Raylib;
 
 namespace Simulation_CSharp.Core;
 
@@ -15,19 +15,31 @@ public static class Updater
 {
     public static ILevel Level = null!;
 
-    private static readonly GraphRenderer GraphRenderer = new GraphRenderer(-4000, 16);
-    
+    private static readonly GraphRenderer GraphRenderer = new(-4000, 16);
+    private static readonly MainMenu Menu = new();
+    private static Scene _scene = Scene.MainMenu;
+
     public static void Update(ref Camera2D camera)
     {
-        Input(ref camera);
-        Raylib.BeginMode2D(camera);
-        Raylib.ClearBackground(new Color(40, 40, 40, 255));
-        CameraModification(ref camera);
-        RenderMap();
-        GraphRenderer.Render();
-        RenderEntities();
-        Raylib.EndMode2D();
-        RenderHud();
+        switch (_scene)
+        {
+            case Scene.MainMenu:
+                Menu.Render(out _scene);
+                break;
+            case Scene.Game:
+                Input(ref camera);
+                BeginMode2D(camera);
+                ClearBackground(SimulationColors.BackgroundColor);
+                CameraModification(ref camera);
+                RenderMap();
+                GraphRenderer.Render();
+                RenderEntities();
+                EndMode2D();
+                RenderHud();
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
     private static void RenderEntities()
@@ -59,18 +71,18 @@ public static class Updater
 
     private static void RenderHud()
     {
-        Raylib.DrawFPS(20, 20);
+        DrawFPS(20, 20);
         ButtonManager.Render();
     }
 
     private static void RenderDebugGrid()
     {
-        for (int i = 0; i < World.Level.WorldWidth; i++)
+        for (var i = 0; i < Level.GetWorldWidth(); i++)
         {
-            for (int j = 0; j < World.Level.WorldHeight; j++)
+            for (var j = 0; j < Level.GetWorldHeight(); j++)
             {
                 var pos = new TileCell(i, j);
-                Raylib.DrawRectangleLines((int) pos.TruePosition.X, (int) pos.TruePosition.Y, (int) TileCell.CellSideLength, (int) TileCell.CellSideLength, Color.BLACK);
+                DrawRectangleLines((int) pos.TruePosition.X, (int) pos.TruePosition.Y, (int) TileCell.CellSideLength, (int) TileCell.CellSideLength, Color.BLACK);
             }
         }
     }
@@ -83,12 +95,12 @@ public static class Updater
 
     private static void CameraModification(ref Camera2D camera)
     {
-        if (Raylib.IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT))
+        if (IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT))
         {
             _initialMousePos = Helper.GetWorldSpaceMousePos(ref camera);
         }
 
-        if (Raylib.IsMouseButtonDown(MouseButton.MOUSE_BUTTON_LEFT))
+        if (IsMouseButtonDown(MouseButton.MOUSE_BUTTON_LEFT))
         {
             var tempSecondPos = Helper.GetWorldSpaceMousePos(ref camera);
             if (_secondMousePos != tempSecondPos)
@@ -99,7 +111,7 @@ public static class Updater
             _secondMousePos = tempSecondPos;
         }
 
-        if (Raylib.IsMouseButtonReleased(MouseButton.MOUSE_BUTTON_LEFT))
+        if (IsMouseButtonReleased(MouseButton.MOUSE_BUTTON_LEFT))
         {
             _initialMousePos = Vector2.Zero;
         }
@@ -111,17 +123,17 @@ public static class Updater
     private static void Input(ref Camera2D camera)
     {
         // Middle click generates a new map. For debugging purposes 
-        if (Raylib.IsKeyDown(KeyboardKey.KEY_F))
+        if (IsKeyDown(KeyboardKey.KEY_F))
         {
             Level.GetMap().GenerateNew();
         }
 
-        if (Raylib.IsKeyDown(KeyboardKey.KEY_R))
+        if (IsKeyDown(KeyboardKey.KEY_R))
         {
             camera.target = Vector2.Zero;
         }
 
-        if (Raylib.IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT) && !ButtonManager.IsMouseOver(ref camera))
+        if (IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT) && !ButtonManager.IsMouseOver(ref camera))
         {
             var mp = new TileCell(Helper.GetWorldSpaceMousePos(ref camera));
             if (Level.GetMap().ExistInRange(mp.X, mp.Y))
@@ -147,7 +159,7 @@ public static class Updater
             }
         }
 
-        var value = Raylib.GetMouseWheelMove();
+        var value = GetMouseWheelMove();
         switch (value)
         {
             case 0:

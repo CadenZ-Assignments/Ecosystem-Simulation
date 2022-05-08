@@ -12,8 +12,9 @@ public class Map : IMap
     public readonly int WorldWidth;
     public readonly int WorldHeight;
     private readonly ILevel _level;
+    private readonly float _generationFrequency;
 
-    public Map(int worldWidth, int worldHeight, ILevel level)
+    public Map(int worldWidth, int worldHeight, ILevel level, float generationFrequency = 0.01f)
     {
         WorldWidth = worldWidth;
         WorldHeight = worldHeight;
@@ -22,6 +23,8 @@ public class Map : IMap
         _level = level;
         Decorations = new Dictionary<TileCell, Tile>();
         UpdatableTiles = new List<Tile>();
+
+        _generationFrequency = generationFrequency;
 
         GenerateNew();
     }
@@ -94,6 +97,7 @@ public class Map : IMap
         // base layer
         var noiseGenerator = new FastNoiseLite(new Random().Next());
         noiseGenerator.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
+        noiseGenerator.SetFrequency(_generationFrequency);
 
         for (var x = 0; x < WorldWidth; x++)
         {

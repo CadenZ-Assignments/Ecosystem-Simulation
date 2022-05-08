@@ -8,20 +8,22 @@ namespace Simulation_CSharp.World;
 
 public class Level : ILevel
 {
-    public const int WorldWidth = 256;
-    public const int WorldHeight = 256;
-        
+    private readonly int _worldWidth;
+    private readonly int _worldHeight;
+    
     private readonly List<Entity> _entities;
     private readonly Queue<(Func<Entity>, TileCell)> _additionQueue;
     private readonly Queue<Entity> _removalQueue;
     private readonly IMap _map;
         
-    public Level()
+    public Level(int worldWidth = 256, int worldHeight = 256, float generationFrequency = 0.01f)
     {
+        _worldWidth = worldWidth;
+        _worldHeight = worldHeight;
         _entities = new List<Entity>();
         _additionQueue = new Queue<(Func<Entity>, TileCell)>();
         _removalQueue = new Queue<Entity>();
-        _map = new Map(WorldWidth, WorldHeight, this);
+        _map = new Map(worldWidth, worldHeight, this, generationFrequency);
     }
 
     public void CreateEntity(Func<Entity> entity, TileCell position)
@@ -81,6 +83,16 @@ public class Level : ILevel
             _entities.Remove(_removalQueue.Dequeue());
             Raylib.TraceLog(TraceLogLevel.LOG_INFO, "Removed Entity");
         }
+    }
+
+    public int GetWorldWidth()
+    {
+        return _worldWidth;
+    }
+
+    public int GetWorldHeight()
+    {
+        return _worldHeight;
     }
 
     public IMap GetMap()

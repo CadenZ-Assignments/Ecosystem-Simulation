@@ -27,9 +27,9 @@ public static class Helper
         return Raylib.GetScreenToWorld2D(Raylib.GetMousePosition(), camera);
     }
 
-    public static bool IsMousePosOverArea(Vector2 areaPos, int width, int height)
+    public static bool IsMousePosOverArea(Vector2 areaPos, int width, int height, ref Camera2D camera)
     {
-        var pos = GetWorldSpaceMousePos(ref SimulationCore.Camera2D);
+        var pos = GetWorldSpaceMousePos(ref camera);
         return pos.X > areaPos.X && pos.X < areaPos.X + width && pos.Y > areaPos.Y && pos.Y < areaPos.Y + height;
     }
     
