@@ -1,5 +1,4 @@
-﻿using System.Security.Cryptography;
-using Raylib_cs;
+﻿using Raylib_cs;
 using Simulation_CSharp.Utils;
 
 namespace Simulation_CSharp.Entities.Inheritance;

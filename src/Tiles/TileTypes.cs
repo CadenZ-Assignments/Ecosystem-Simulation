@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-using Raylib_cs;
+﻿using Raylib_cs;
 using Simulation_CSharp.Core;
 using Simulation_CSharp.Entities;
 using Simulation_CSharp.Utils;

@@ -17,7 +17,7 @@ public static class SimulationCore
         Updater.Level = _level;
 
         Raylib.SetConfigFlags(ConfigFlags.FLAG_WINDOW_RESIZABLE);
-        Raylib.InitWindow(800, 480, "Simulation Engine");
+        Raylib.InitWindow(800, 480, "Ecosystem Simulation");
         Raylib.SetWindowIcon(Raylib.LoadImage("resources/logo.png"));
 
         ResourceLoader.LoadTextures();

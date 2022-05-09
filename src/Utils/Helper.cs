@@ -7,14 +7,16 @@ namespace Simulation_CSharp.Utils;
 
 public static class Helper
 {
+    private static readonly Random Random = new Random();
+    
     public static bool Chance(int chance)
     {
-        return new Random().NextDouble() < chance / 100D;
+        return Random.NextDouble() < chance / 100D;
     }
     
     public static bool Chance(double chance)
     {
-        return new Random().NextDouble() < chance;
+        return Random.NextDouble() < chance;
     }
 
     public static string FileSafeFormat(this string value)

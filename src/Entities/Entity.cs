@@ -27,12 +27,16 @@ public abstract class Entity
     public readonly Guid Uuid;
     public bool IsSelected;
 
-    public virtual Lazy<string> TexturePath => new(() => "entities\\" + EntityName.FileSafeFormat() + ".png");
+    public string TexturePath;
+
+    private Texture2D _texture;
 
     protected Entity(Gene genetics, string entityName, bool isBaby = false)
     {
         Genetics = genetics;
         EntityName = entityName;
+        TexturePath = "entities\\" + EntityName.FileSafeFormat() + ".png";
+        _texture = ResourceLoader.GetTexture(TexturePath);
         IsBaby = isBaby;
         Uuid = Guid.NewGuid();
         Brain = new Lazy<Brain>(() =>
@@ -53,10 +57,9 @@ public abstract class Entity
 
     public virtual void Render()
     {
-        var texture = ResourceLoader.GetTexture(TexturePath.Value);
-        var mouseOver = Helper.IsMousePosOverArea(Position.TruePosition, texture.width, texture.height, ref SimulationCore.Camera2D);
-        Raylib.DrawTexture(texture, (int) Position.TruePosition.X, (int) Position.TruePosition.Y, GetRenderColor(mouseOver));
-        RenderHoverTooltip(texture, mouseOver);
+        var mouseOver = Helper.IsMousePosOverArea(Position.TruePosition, _texture.width, _texture.height, ref SimulationCore.Camera2D);
+        Raylib.DrawTexture(_texture, (int) Position.TruePosition.X, (int) Position.TruePosition.Y, GetRenderColor(mouseOver));
+        RenderHoverTooltip(_texture, mouseOver);
     }
 
     public virtual void Update()
@@ -75,11 +78,11 @@ public abstract class Entity
             return;
         }
         
-        if (Helper.Chance(1 * SimulationCore.Time))
+        if (Helper.Chance(1 * SimulationCore.Time * Genetics.ReproductiveUrgeModifier))
         {
             if (ReproductiveUrge < 100)
             {
-                ReproductiveUrge += 1 * SimulationCore.Time * Genetics.ReproductiveUrgeModifier;
+                ReproductiveUrge += 1 * SimulationCore.Time;
                 ReproductiveUrge = Math.Clamp(ReproductiveUrge, 0, 100);
             }
         }
