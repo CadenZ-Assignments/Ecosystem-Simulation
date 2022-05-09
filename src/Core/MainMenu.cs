@@ -23,10 +23,9 @@ public class MainMenu
         _pos1 = new Vector2(400, 300);
         _pos2 = new Vector2(1300, 400);
         _pos3 = new Vector2(550, 800);
-        
-        _camera1 = new Camera2D(new Vector2(400, 300),  new Vector2(12*TileCell.CellSideLength, 12*TileCell.CellSideLength), 0, 0.5F);
-        _camera2 = new Camera2D(new Vector2(1300, 400),  new Vector2(16*TileCell.CellSideLength, 16*TileCell.CellSideLength), 0, 0.5F);
-        _camera3 = new Camera2D(new Vector2(550, 800),  new Vector2(8*TileCell.CellSideLength, 8*TileCell.CellSideLength), 0, 0.5F);
+        _camera1 = new Camera2D(_pos1,  new Vector2(12*TileCell.CellSideLength, 12*TileCell.CellSideLength), 0, 0.5F);
+        _camera2 = new Camera2D(_pos2,  new Vector2(16*TileCell.CellSideLength, 16*TileCell.CellSideLength), 0, 0.5F);
+        _camera3 = new Camera2D(_pos3,  new Vector2(8*TileCell.CellSideLength, 8*TileCell.CellSideLength), 0, 0.5F);
         _miniatureLevel1 = new Level(48, 48, 0.05f);
         _miniatureLevel2 = new Level(64, 64, 0.04f);
         _miniatureLevel3 = new Level(32, 32, 0.08f);
@@ -114,5 +113,57 @@ public class MainMenu
         Raylib.DrawFPS(20, 20);
 
         scene = Scene.MainMenu;
+    }
+    
+    private class GlobeButton
+    {
+        private readonly ILevel _level;
+        private readonly float _xRatio;
+        private readonly float _yRatio;
+        private readonly string _text;
+        private readonly Action _onPress;
+        private readonly int _worldSize;
+        private Camera2D _camera;
+        private Vector2 _pos;
+
+        public GlobeButton(int x, int y, int worldSize, int generationFrequency, float xRatio, float yRatio, string text, Action onPress)
+        {
+            _xRatio = xRatio;
+            _yRatio = yRatio;
+            _text = text;
+            _worldSize = worldSize;
+            _onPress = onPress;
+            _level = new Level(worldSize, worldSize, generationFrequency);
+            _pos = new Vector2(x, y);
+            _camera = new Camera2D(_pos,  new Vector2(worldSize/4F*TileCell.CellSideLength, worldSize/4F*TileCell.CellSideLength), 0, 0.5F);
+        }
+
+        public void Render()
+        {
+            var screenWidth = Raylib.GetScreenWidth();
+            var screenHeight = Raylib.GetScreenHeight();
+            Color color;
+            
+            _pos = new Vector2(screenWidth / _xRatio, screenHeight / _yRatio);
+
+            _camera.rotation+=0.01f;
+            _camera.zoom = screenWidth / 1920F / 2;
+            _camera.offset = _pos;
+            Raylib.BeginMode2D(_camera);
+            _level.GetMap().Render();
+            if (Helper.IsMousePosOverArea(_pos / 8, (int) (_worldSize/2F * TileCell.CellSideLength), (int) (_worldSize/2F * TileCell.CellSideLength), ref _camera))
+            {
+                color = Color.WHITE;
+                if (Raylib.IsMouseButtonDown(MouseButton.MOUSE_BUTTON_LEFT))
+                {
+                }
+            }
+            else
+            {
+                color = Color.BLACK;
+            }
+            Raylib.DrawText(_text, (int) (12 * TileCell.CellSideLength) - Raylib.MeasureText(_text, 100) / 2, (int) (12 * TileCell.CellSideLength), 100, color);
+            Raylib.EndMode2D();
+        }
     }
 }
