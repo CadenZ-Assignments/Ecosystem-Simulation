@@ -6,7 +6,7 @@ namespace Simulation_CSharp.Entities.AI.Goals;
 public class ReproduceGoal : Goal
 {
     private readonly Predicate<Entity> _match;
-    private Entity? _mate;
+    private Entity _mate = null!;
     private int _step;
     
     public ReproduceGoal(int priority, Entity entity, Brain brain) : base(priority, false, false, entity, brain, "Looking for a mate")
@@ -14,24 +14,26 @@ public class ReproduceGoal : Goal
         _match = entity1 => entity1.SameSpecieAs(Entity) &&
                            entity1.Genetics.BiologicalSex == Entity.Genetics.BiologicalSex.Opposite() &&
                            entity1 != Entity && 
-                           entity1.ReproductiveUrge > 50;
+                           entity1.ReproductiveUrge > 50 &&
+                           !Entity.HasRejectedBy(entity1);
     }
 
     public override void OnPicked()
     {
-        _mate = Entity.FindEntity(_match);
-        StatusText = "Looking for a mate";
-        _step = 0;
-    }
-
-    public override void PerformTask()
-    {
-        if (_mate is null)
+        var mate = Entity.FindEntity(_match);
+        
+        if (mate is null)
         {
             GoalCompleted();
             return;
         }
-        
+
+        _step = 0;
+        _mate = mate;
+    }
+
+    public override void PerformTask()
+    {
         var path = Entity.FindPathTo(_mate);
 
         if (!path.Any())
@@ -58,6 +60,17 @@ public class ReproduceGoal : Goal
             return;
         }
 
+        if (Entity.Position.Distance(path.Last()) <= 8)
+        {
+            // if entity gets rejected we do not continue
+            if (!_mate.RequestMate(Entity))
+            {
+                Entity.RejectedBy(_mate);
+                GoalCompleted();
+                return;
+            }
+        }
+        
         if (Entity.Position.Distance(path.Last()) <= 0.5)
         {
             Entity.MakeBaby(_mate);

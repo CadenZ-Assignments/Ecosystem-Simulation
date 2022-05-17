@@ -27,9 +27,11 @@ public abstract class Entity
     public readonly Guid Uuid;
     public bool IsSelected;
 
-    public string TexturePath;
+    public readonly string TexturePath;
+    private readonly Texture2D _texture;
 
-    private Texture2D _texture;
+    protected readonly List<Entity> RejectedMates;
+    private int _forgetRejectionTimer = 2000;
 
     protected Entity(Gene genetics, string entityName, bool isBaby = false)
     {
@@ -46,12 +48,40 @@ public abstract class Entity
             return brain;
         });
         Genetics.InfluenceStats(this);
+        RejectedMates = new List<Entity>();
     }
 
     /// <summary>
     /// Called by ReproduceGoal to make babies
     /// </summary>
     public abstract void MakeBaby(Entity mate);
+
+    /// <summary>
+    /// Called by other entities when they are looking for a mate
+    /// </summary>
+    /// <returns>Determines if this entity accepts mate request</returns>
+    public virtual bool RequestMate(Entity other)
+    {
+        return true;
+    }
+
+    /// <summary>
+    /// Called by ReproduceGoal when RequestMate on the target entity returns false
+    /// </summary>
+    /// <param name="entity">The entity that rejected this entity</param>
+    public void RejectedBy(Entity entity)
+    {
+        RejectedMates.Add(entity);
+    }
+
+    /// <summary>
+    /// Has the current entity been rejected by the given entity?
+    /// </summary>
+    /// <returns></returns>
+    public bool HasRejectedBy(Entity entity)
+    {
+        return RejectedMates.Contains(entity);
+    }
     
     protected abstract Brain CreateBrain();
 
@@ -74,8 +104,23 @@ public abstract class Entity
         if (Health <= 0)
         {
             Destroy();
-            Raylib.TraceLog(TraceLogLevel.LOG_INFO, EntityName + " Died");
+            Raylib.TraceLog(TraceLogLevel.LOG_INFO, EntityName + " died");
             return;
+        }
+        
+        if (Position.X > Level.GetWorldWidth() || Position.X < 0 || Position.Y > Level.GetWorldHeight() || Position.Y < 0)
+        {
+            Destroy();
+            Raylib.TraceLog(TraceLogLevel.LOG_INFO, EntityName + " was destroyed because it went out of world bound");
+        }
+
+        if (IsSelected)
+        {
+            if (Raylib.IsKeyPressed(KeyboardKey.KEY_DELETE))
+            {
+                Destroy();
+                Raylib.TraceLog(TraceLogLevel.LOG_INFO, EntityName + " was destroyed due to player request");
+            }
         }
         
         if (Helper.Chance(1 * SimulationCore.Time * Genetics.ReproductiveUrgeModifier))
@@ -95,17 +140,12 @@ public abstract class Entity
             }
         }
 
-        if (Position.X > Level.GetWorldWidth() || Position.X < 0 || Position.Y > Level.GetWorldHeight() || Position.Y < 0)
+        if (RejectedMates.Any())
         {
-            Destroy();
-        }
-
-        if (IsSelected)
-        {
-            if (Raylib.IsKeyPressed(KeyboardKey.KEY_DELETE))
-            {
-                Destroy();
-            }
+            _forgetRejectionTimer--;
+            if (_forgetRejectionTimer > 0) return;
+            RejectedMates.Clear();
+            _forgetRejectionTimer = 2000;
         }
     }
 
@@ -164,6 +204,11 @@ public abstract class Entity
         var speed = 0.4F * Genetics.MaxSpeed * SimulationCore.Time;
         var targetPos = new TileCell(position);
 
+        if (IsBaby)
+        {
+            speed /= 2;
+        }
+        
         // can not walk out of map
         if (!Level.GetMap().ExistInRange(targetPos.X, targetPos.Y))
         {

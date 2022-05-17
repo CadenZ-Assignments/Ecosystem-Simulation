@@ -15,9 +15,14 @@ public abstract class BabyEntity : Entity
 
     public override void MakeBaby(Entity mate)
     {
-        throw new NotImplementedException("WTF DUDE STOP FORCING CHILDREN TO HAVE SEX");
+        throw new NotImplementedException("No");
     }
-    
+
+    public override bool RequestMate(Entity other)
+    {
+        throw new NotImplementedException("No");
+    }
+
     public override void Update()
     {
         base.Update();

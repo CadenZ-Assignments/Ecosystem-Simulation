@@ -90,6 +90,11 @@ public class Brain
     {
         return _currentGoal == null ? "Idling" : _currentGoal.StatusText;
     }
+
+    public Goal? GetCurrentGoal()
+    {
+        return _currentGoal;
+    }
     
     private Goal? PickGoal()
     {
