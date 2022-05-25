@@ -62,6 +62,7 @@ public abstract class Entity
     /// <returns>Determines if this entity accepts mate request</returns>
     public virtual bool RequestMate(Entity other)
     {
+        // TODO
         return true;
     }
 
@@ -279,6 +280,7 @@ public abstract class Entity
         tooltipRenderer.DrawProgressBar("Health", Genetics.MaxHealth, Health);
         tooltipRenderer.DrawProgressBar("Hunger", Genetics.MaxHunger, Hunger);
         tooltipRenderer.DrawProgressBar("Thirst", Genetics.MaxThirst, Thirst);
+        tooltipRenderer.DrawProgressBar("Forget Rejection", 2000, _forgetRejectionTimer);
         if (!IsBaby)
         {
             tooltipRenderer.DrawProgressBar("Reproductive Urge", Gene.MaxReproductiveUrge, ReproductiveUrge);
