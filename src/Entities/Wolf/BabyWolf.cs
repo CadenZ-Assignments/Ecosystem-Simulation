@@ -20,6 +20,7 @@ public class BabyWolf : BabyEntity
     {
         var brain = new Brain(this, new AStarPathFinder(this));
         brain.RegisterGoal(new DrinkGoal(5, this, brain));
+        brain.RegisterGoal(new EatSheepGoal(5, this, brain));
         brain.RegisterGoal(new RandomWalkGoal(0, this, brain, 10));
         return brain;
     }

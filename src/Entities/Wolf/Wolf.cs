@@ -28,7 +28,7 @@ public class Wolf : Entity
         return brain;
     }
 
-    public override void MakeBaby(Entity mate)
+    public override void CreateOffspring(Entity mate)
     {
         if (mate is not Wolf) return;
         for (var i = 0; i < Raylib.GetRandomValue(1, 4); i++)

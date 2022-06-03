@@ -73,7 +73,7 @@ public class ReproduceGoal : Goal
         
         if (Entity.Position.Distance(path.Last()) <= 0.5)
         {
-            Entity.MakeBaby(_mate);
+            Entity.CreateOffspring(_mate);
             Entity.ReproductiveUrge = 0;
             GoalCompleted();
         }

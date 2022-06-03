@@ -54,7 +54,7 @@ public abstract class Entity
     /// <summary>
     /// Called by ReproduceGoal to make babies
     /// </summary>
-    public abstract void MakeBaby(Entity mate);
+    public abstract void CreateOffspring(Entity mate);
 
     /// <summary>
     /// Called by other entities when they are looking for a mate

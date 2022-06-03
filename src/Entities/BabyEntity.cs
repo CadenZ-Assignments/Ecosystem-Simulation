@@ -13,14 +13,14 @@ public abstract class BabyEntity : Entity
         GrowthCountDown = 0;
     }
 
-    public override void MakeBaby(Entity mate)
+    public override void CreateOffspring(Entity mate)
     {
-        throw new NotImplementedException("No");
+        throw new NotSupportedException("Baby entity can not create offspring");
     }
 
     public override bool RequestMate(Entity other)
     {
-        throw new NotImplementedException("No");
+        throw new NotSupportedException("Baby entity can not mate");
     }
 
     public override void Update()
