@@ -13,8 +13,9 @@ Clone this repository using `git clone https://github.com/CadenZ-Assignments/Eco
 Open a console at the cloned directory or just do `cd Ecosystem-Simulation`
 ### Step 3
 Run `dotnet build`  
-
 If you have the correct dotnet version installed, that should be all that you have to do. After it finishes the build, an executable file will be generated in `bin/Debug`
+### Step 4
+Copy the `resources` folder into the folder where the compiled executable is located *should be in `bin/Debug`* 
 
 ## Contributing to the project
 Honestly this is just an interest project of my own, but if you really want to help, or point out any mistakes in my code, feel free to open a pull request.
